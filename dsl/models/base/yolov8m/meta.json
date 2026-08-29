@@ -1,0 +1,6 @@
+{
+  "name": "yolov8m",
+  "type": "detector",
+  "input_size": 640,
+  "classes": 80
+}

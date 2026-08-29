@@ -1,0 +1,33 @@
+# ---- Build outputs ----
+build/
+cmake-build-*/
+*.exe
+*.dll
+*.obj
+*.o
+*.a
+*.lib
+
+# ---- Qt ----
+gui/build/
+CMakeUserPresets.json
+
+# ---- Runtime caches & logs ----
+dsl/cache/
+dsl/logs/
+
+# ---- Secrets (contains LLM API key) ----
+dsl/config/settings.ini
+
+# ---- Large model binaries (download/export instead) ----
+*.onnx
+*.pt
+models/base/**/model.onnx
+
+# ---- Sample gallery (commit your own images or keep it out of the repo) ----
+photo/
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.venv/
