@@ -18,7 +18,7 @@ struct CacheEntry {
 // The full cache index for one base model, serialized to
 // <cache_root>/<model>/cache_index.json.
 struct CacheIndex {
-    std::string version = "1.1";   // 1.1: adds exposure/blur/EXIF/user_tags to ImageAttrs
+    std::string version = "1.2";   // 1.1: exposure/blur/EXIF/user_tags; 1.2: Places365 scene_vector
     std::string model_name;
     std::vector<std::string> photo_dirs;
     int next_obj_id = 0;   // next globally-unique object id

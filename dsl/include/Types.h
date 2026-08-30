@@ -60,6 +60,14 @@ struct ImageAttrs {
 
     // ---- user tags (key-value annotations, edited via the GUI) ----
     std::map<std::string, std::string> user_tags;
+
+    // ---- Places365 scene recognition (computed during cache preprocessing) ----
+    // scene_vector: softmax probabilities over the 365 Places365 scene classes
+    // (index i -> categories_places365.txt line i).  All zeros when the scene
+    // model is unavailable.
+    std::array<float, 365> scene_vector{};
+    std::string dominant_scene;          // highest-probability scene name ("" if unavailable)
+    float indoor_score = 0;              // P(indoor) = sum over the 205 indoor classes
 };
 
 // One active tag-filter condition for the pre-filter pipeline (applied before

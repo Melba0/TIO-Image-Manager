@@ -13,7 +13,8 @@
 - **引擎**：C++17 DSL 解释器（`tio/dsl`，产物 `dsl.exe`），负责解析/求值 DSL、加载 ONNX
   模型推理、缓存管理、扩展包细化。
 - **推理后端**：ONNX Runtime（CPU），已完全移除 LibTorch。
-- **模型**：基座 `yolov8m-oiv7.onnx`（Open Images V7，601 类，内置 fruit/food/animal/vehicle 等父类）。
+- **模型**：基座 `yolov8m-oiv7.onnx`（Open Images V7，601 类，内置 fruit/food/animal/vehicle 等父类）；
+  Places365 场景识别（ResNet18/50 → ONNX，365 类，用户提供模型文件）。
 - **数据**：图库在 `tio/photo`（128 张图片）。
 
 ## 2. 架构总览
@@ -43,6 +44,7 @@ tio/
 │   ├── src/
 │   │   ├── main.cpp              # 入口 + --json REPL/文件模式
 │   │   ├── cache/                # CacheManager(增量) + CacheIndex + YoloInference(ONNX)
+│   │   ├── scene/                # SceneInference（Places365，ONNX，纯 C++/GDI+）
 │   │   ├── engine/               # OnnxInference（ONNX Runtime 后端）
 │   │   ├── executor/             # Evaluator / Context / BuiltinMacros
 │   │   ├── parser/               # Lexer / Parser / AST（手写递归下降，无 Lark）
@@ -50,11 +52,12 @@ tio/
 │   ├── models/
 │   │   ├── registry.json         # active_base / active_extensions
 │   │   ├── base/yolov8m-oiv7/    # {model.onnx, meta.json, classes.json}
+│   │   ├── scene/                # Places365（用户提供 .onnx + categories，见其 README）
 │   │   └── extensions/           # 扩展包（当前为空，见 §8）
 │   ├── cache/                    # 运行时生成：<model>/cache_index.json
-│   ├── config/                   # settings.ini(GUI 设置 + 推理阈值) + config.json(兼容)
+│   ├── config/                   # settings.ini（GUI 设置 + 推理阈值）
 │   ├── docs/                     # 本目录
-│   └── *.py                      # 模型转换工具 export_yolov8.py（见 python_tools.md）
+│   └── *.py                      # export_yolov8 / export_places365 / caffe_places365_to_onnx
 └── gui/                          # Qt 项目（产物 gui/build/tio.exe + 伴生 dsl.exe）
 ```
 
@@ -81,9 +84,9 @@ tio/
 - `classes.json` 的 601 个输出类别按模型输出下标排序，父类链来自 Open Images 官方层级，
   统一小写；父类（fruit/food/animal/vehicle…）本身就是输出类别。
 - `registry.json`：`active_base = "yolov8m-oiv7"`。
-- 推理阈值已迁至 `config/settings.ini` 的 `[inference]`：`base_conf_threshold`(0.25)、
+- 推理阈值统一存于 `config/settings.ini` 的 `[inference]`：`base_conf_threshold`(0.25)、
   `iou_threshold`(0.45)、`fallback_threshold`(0，禁用置信度降级——OIV7 直接输出父类)。
-  `config/config.json` 仅在 settings.ini 缺失时兜底。
+  引擎只读取 settings.ini（`config/config.json` 已移除）。
 
 ### 4.4 DSL 语法修正（重要）
 新语法（唯一推荐写法）：
@@ -160,6 +163,24 @@ GUI：双击结果打开图片详情对话框（元数据 + 标记编辑，直�
   `CacheManager::removeImages` 删除文件并重写索引）。GUI 检测到 DSL 含 `del` 会先弹确认框。
 - **对话框防呆**：TagFilterDialog 全部按钮 `setDefault(false)`/`setAutoDefault(false)`，
   避免回车同时触发默认按钮（曾导致"回车误删当前行 / 误新增空行"）。
+
+### 4.9 Places365 场景识别（SceneInference）
+- **模型**：`models/scene/places365_googlenet.onnx`（**GoogLeNet**，由官方
+  `googlenet_places365.caffemodel` + deploy prototxt 转换而来，转换脚本
+  `caffe_places365_to_onnx.py`）+ `categories_places365.txt`（官方 365 行）。
+  备选 PyTorch ResNet18/50：`export_places365.py`。详见 `models/scene/README.md`。
+- **实现**：`src/scene/SceneInference.{h,cpp}`，纯 C++ + ONNX Runtime + GDI+（沿用现有
+  图像栈，不引入 OpenCV）。预处理：缩放 224×224 → RGB → `(x/255-mean)/std`
+  （ImageNet 统计）→ 推理 → softmax(365)。单张推理约 30ms（CPU，GoogLeNet）。
+- **缓存**：`ImageAttrs` 新增 `scene_vector`（`std::array<float,365>`）、`dominant_scene`、
+  `indoor_score`（前 205 类概率和）；`CacheIndex` 版本升到 `1.2`（旧缓存自动重建）。
+- **集成点**：`CacheManager::inferEntry` 在 YOLO 检测**之后、独立**地跑场景推理
+  （同一张原始图），懒加载模型；缺失时打日志并降级（宏返回 0.0 / ""）。
+- **DSL 宏**：`img_scene("name")` / `img_scene_top()` / `img_scene_vec()` / `img_is_indoor()`
+  （`SceneFn` 枚举 + `evalSceneMacro`）。类别名从 `/b/beach 48` 解析为 `beach`；
+  大小写与 `-`/`_`/空格 不敏感。
+- **GUI**：图片详情对话框展示 `dominant_scene`、室内概率与 Top-5 场景。
+- **性能**：单张场景推理 ~30ms（CPU），与物体/颜色/曝光/EXIF 并存。
 
 ## 5. 构建与运行
 

@@ -85,6 +85,12 @@ void registerBuiltinMacros(Context& ctx) {
     ctx.registerMacro("stof", MacroDef::img(ImgFn::Stof, 1));                   // stof(s)
     ctx.registerMacro("str_contains", MacroDef::img(ImgFn::StrContains, 2));    // str_contains(s, sub)
 
+    // ---- built-in Places365 scene-recognition macros (cached ImageAttrs) ----
+    ctx.registerMacro("img_scene", MacroDef::scene(SceneFn::SceneProb, 1));     // img_scene("beach")
+    ctx.registerMacro("img_scene_top", MacroDef::scene(SceneFn::SceneTop, 0));  // img_scene_top()
+    ctx.registerMacro("img_scene_vec", MacroDef::scene(SceneFn::SceneVec, 0));  // img_scene_vec() (internal)
+    ctx.registerMacro("img_is_indoor", MacroDef::scene(SceneFn::IsIndoor, 0));  // img_is_indoor()
+
     // ---- spatial / geometric macros ----
     reg(ctx, "big", {"x"}, bin(op("x", "area"), BinOp::GT, num(0.2)));
     reg(ctx, "small", {"x"}, bin(op("x", "area"), BinOp::LT, num(0.05)));

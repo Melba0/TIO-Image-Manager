@@ -231,6 +231,15 @@ warm & bright         # 裸调用：把当前对象广播给单参数宏
 | `img_tag(key)` / `img_has_tag(key)` / `img_tag_equals(k,v)` | 用户标记查询 |
 | `stof(s)` / `str_contains(s, sub)` | 字符串→数值 / 包含判断 |
 
+**Places365 场景识别宏**（基于缓存中的 365 维场景概率向量；模型缺失时返回 0.0 / 空字符串）：
+
+| 宏 | 说明 |
+|----|------|
+| `img_scene("beach")` | 图片在该场景上的概率（0~1；名称大小写与 `-`/`_`/空格不敏感） |
+| `img_scene_top()` | 概率最高的场景名称（字符串） |
+| `img_scene_vec()` | 内部：返回最高场景概率（365 维向量不直接暴露给 DSL） |
+| `img_is_indoor()` | 室内概率（前 205 类概率之和，0~1） |
+
 **空间 / 几何宏**（接收对象，返回 Bool）：
 
 | 宏 | 逻辑 |
@@ -295,6 +304,16 @@ result = cat_pics & dog_pics
 
 # 继承计数：水果超过 2 个的图片
 fruit_pics = $ : (cnt(fruit) > 2)
+
+# 场景识别（Places365）：找海滩 / 厨房或餐厅照片
+beach_pics = $ : (img_scene("beach") > 0.7)
+food_pics  = $ : (img_scene("kitchen") > 0.5 || img_scene("dining_room") > 0.5)
+
+# 室内且有人的照片
+indoor_people = $ : (img_is_indoor() > 0.6 && any(class == "person"))
+
+# 主场景是森林的照片
+forest_pics = $ : (img_scene_top() == "forest")
 
 # 扩展细化：flower → 花朵部位 → 上溯
 flowers = % $ : (any flower)

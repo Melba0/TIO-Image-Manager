@@ -88,6 +88,11 @@ public:
     ModelRegistry* getRegistry() const { return registry_; }
     ExtensionManager* getExtensionManager() const { return ext_; }
 
+    // ---- Places365 scene labels (index i -> categories_places365.txt line i) ----
+    // Empty when the scene model is unavailable.  Used by img_scene("name").
+    void setSceneLabels(const std::vector<std::string>& labels) { scene_labels_ = labels; }
+    const std::vector<std::string>& getSceneLabels() const { return scene_labels_; }
+
     // Variable management
     bool hasVariable(const std::string& name) const;
     Value getVariable(const std::string& name) const;
@@ -153,4 +158,5 @@ private:
     std::unordered_set<std::string> prefiltered_ids_;
     bool prefilter_active_ = false;
     DeleteImagesFn delete_cb_;
+    std::vector<std::string> scene_labels_;
 };

@@ -463,10 +463,9 @@ int main(int argc, char* argv[]) {
     std::cout << "[Main] photo dir: " << photo_dir << std::endl;
 
     // Load configuration (confidence thresholds).  The GUI persists these in
-    // config/settings.ini under [inference] (written with QSettings); the
-    // engine also falls back to the legacy config/config.json keys.
+    // config/settings.ini under [inference] (written with QSettings); that is
+    // the single source of truth for the engine.
     const std::string settings_ini = (fs::path(project_dir) / "config" / "settings.ini").string();
-    const std::string config_json = (fs::path(project_dir) / "config" / "config.json").string();
     float fallback_threshold = 0.0f;
     float base_conf_threshold = 0.25f;
     float iou_threshold = 0.45f;
@@ -512,20 +511,10 @@ int main(int argc, char* argv[]) {
         return def;
     };
 
-    // Legacy config.json only supplies a value when settings.ini does not
-    // (settings.ini is the single source of truth the GUI writes).
     {
         float ini_fb = readIniFloat(settings_ini, "inference", "fallback_threshold", NAN);
         float ini_bc = readIniFloat(settings_ini, "inference", "base_conf_threshold", NAN);
         float ini_iou = readIniFloat(settings_ini, "inference", "iou_threshold", NAN);
-        try {
-            std::ifstream cfg_file(config_json);
-            if (cfg_file) {
-                auto cfg = nlohmann::json::parse(cfg_file);
-                if (std::isnan(ini_fb)) ini_fb = cfg.value("conf_threshold", fallback_threshold);
-                if (std::isnan(ini_bc)) ini_bc = cfg.value("base_conf_threshold", base_conf_threshold);
-            }
-        } catch (...) {}
         if (!std::isnan(ini_fb)) fallback_threshold = ini_fb;
         if (!std::isnan(ini_bc)) base_conf_threshold = ini_bc;
         if (!std::isnan(ini_iou)) iou_threshold = ini_iou;
@@ -551,7 +540,9 @@ int main(int argc, char* argv[]) {
 
     CacheManager cache(photo_dirs, (fs::path(project_dir) / "cache").string(),
                        registry, id_gen,
-                       fallback_threshold, base_conf_threshold, iou_threshold);
+                       fallback_threshold, base_conf_threshold, iou_threshold,
+                       (fs::path(project_dir) / "models" / "scene" / "places365_googlenet.onnx").string(),
+                       (fs::path(project_dir) / "models" / "scene" / "categories_places365.txt").string());
     if (!cache.ensureCacheReady()) {
         std::cerr << "Failed to load or build cache." << std::endl;
         return 1;
@@ -574,6 +565,33 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<Context> ctx =
         std::make_unique<Context>(cache.getPhotoCache(), &registry, &ext_mgr);
     registerBuiltinMacros(*ctx);
+
+    // Load the Places365 scene labels into the context so img_scene("name")
+    // can map scene names to vector indices.  Empty when the file is missing.
+    {
+        std::vector<std::string> scene_labels;
+        std::ifstream slf((fs::path(project_dir) / "models" / "scene" / "categories_places365.txt").string());
+        std::string line;
+        while (slf && std::getline(slf, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (line.empty()) continue;
+            // "/b/beach 48" -> "beach"  (drop trailing index + path prefix)
+            std::string name = line;
+            size_t sp = name.find_last_of(" \t");
+            if (sp != std::string::npos) {
+                bool all_digits = true;
+                for (size_t k = sp + 1; k < name.size(); ++k) {
+                    if (!std::isdigit((unsigned char)name[k])) { all_digits = false; break; }
+                }
+                if (all_digits) name = name.substr(0, sp);
+            }
+            size_t sl = name.find_last_of('/');
+            if (sl != std::string::npos) name = name.substr(sl + 1);
+            if (!name.empty()) scene_labels.push_back(name);
+        }
+        ctx->setSceneLabels(scene_labels);
+    }
+
     std::unique_ptr<Evaluator> evaluator = std::make_unique<Evaluator>(*ctx);
     evaluator->setHardMode(hard_mode);
 

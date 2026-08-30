@@ -45,6 +45,7 @@ private:
     Value evalColorMacro(const MacroCallExpr& node, const MacroDef* m);
     Value evalHistMacro(const MacroCallExpr& node, const MacroDef* m);
     Value evalImgMacro(const MacroCallExpr& node, const MacroDef* m);
+    Value evalSceneMacro(const MacroCallExpr& node, const MacroDef* m);
     static float colorMatch(const Attr& a, const std::string& name);
     static float cosineHistSim(const HistVec& a, const HistVec& b);
     // Highest-confidence object of `cls` (is-a aware) in the current image.

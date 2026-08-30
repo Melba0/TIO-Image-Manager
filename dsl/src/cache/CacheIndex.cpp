@@ -91,6 +91,9 @@ json attrsToJson(const ImageAttrs& ia) {
         {"width", ia.width},
         {"height", ia.height},
         {"user_tags", ia.user_tags},
+        {"dominant_scene", ia.dominant_scene},
+        {"indoor_score", ia.indoor_score},
+        {"scene_vector", ia.scene_vector},
     };
 }
 
@@ -126,6 +129,12 @@ ImageAttrs attrsFromJson(const json& ia) {
         const auto& lh = ia["luma_hist"];
         for (int i = 0; i < 64 && i < (int)lh.size(); ++i) a.luma_hist[i] = lh[i].get<float>();
     }
+    if (ia.contains("scene_vector")) {
+        const auto& sv = ia["scene_vector"];
+        for (int i = 0; i < 365 && i < (int)sv.size(); ++i) a.scene_vector[i] = sv[i].get<float>();
+    }
+    a.dominant_scene = ia.value("dominant_scene", "");
+    a.indoor_score = ia.value("indoor_score", 0.f);
     return a;
 }
 

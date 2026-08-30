@@ -1,0 +1,5 @@
+{
+  "name": "Places365-GoogLeNet",
+  "classes": 365,
+  "input_size": 224
+}

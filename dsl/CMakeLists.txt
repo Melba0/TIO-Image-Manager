@@ -64,6 +64,7 @@ set(SOURCES
     src/cache/CacheManager.cpp
     src/cache/CacheIndex.cpp
     src/cache/YoloInference.cpp
+    src/scene/SceneInference.cpp
     src/engine/OnnxInference.cpp
     src/parser/Lexer.cpp
     src/parser/Parser.cpp

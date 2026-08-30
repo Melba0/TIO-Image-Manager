@@ -15,6 +15,9 @@
 - **图像属性**：每张图在缓存预处理阶段计算 32 维色调直方图（`obj_hist`/`img_hist`/`hist_sim`）、
   曝光评分（`img_over`/`img_under`/`img_exp_good`）、清晰度（`img_blur`/`obj_blur`）、
   内置轻量 EXIF 解析（相机/ISO/快门/光圈/焦距/日期）与可编辑的用户标记 `user_tags`。
+- **场景识别（Places365）**：预处理阶段用 Places365 模型（ONNX Runtime / CPU，纯 C++）
+  计算 365 维场景概率向量，DSL 宏 `img_scene("beach")` / `img_scene_top()` /
+  `img_is_indoor()` 按场景检索（模型缺失时优雅降级）。
 - **标签预筛选**：`--tag-filter key=v1|v2` 在求值前把 `$` 限制到标签匹配的图片（多条件 AND、
   值 OR）；匹配 0 张时返回空结果而非回退全库。GUI 通过「🏷️ 标签筛选」对话框配置并持久化。
 - **资产管理**：`del <路径|表达式|变量>` 删除图片文件并同步更新缓存索引；GUI 支持多选删除。
@@ -46,18 +49,19 @@ tio/
     │   ├── parser/               # Lexer / Parser / AST（手写递归下降）
     │   ├── executor/             # Evaluator / Context / BuiltinMacros
     │   ├── cache/                # CacheManager(增量) + CacheIndex + YoloInference(ONNX)
+    │   ├── scene/                # SceneInference（Places365，ONNX）
     │   ├── engine/               # OnnxInference（ONNX Runtime 后端）
     │   └── utils/                # filesystem_utils / exif_reader
     ├── models/
     │   ├── registry.json         # 切换开关（active_base / active_extensions）
     │   ├── base/yolov8m-oiv7/    # {model.onnx, meta.json, classes.json}
+    │   ├── scene/                # Places365 场景识别（.onnx + categories + meta.json）
     │   └── extensions/           # 扩展包（可选，见 extension_pack_format.md）
     ├── config/
-    │   ├── settings.ini          # GUI 设置 + [inference] 推理阈值
-    │   └── config.json           # 兼容旧阈值配置（settings.ini 缺失时兜底）
+    │   └── settings.ini           # GUI 设置 + [inference] 推理阈值
     ├── cache/                    # 运行时自动生成（按模型分子目录）
     ├── docs/                     # 本文档
-    └── export_yolov8.py          # .pt -> .onnx 导出工具
+    └── *.py                      # export_yolov8 / export_places365 / caffe_places365_to_onnx
 ```
 
 ## 环境依赖

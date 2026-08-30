@@ -105,6 +105,10 @@ QHash<QString, QString>& zhMap() {
         {"Result (scalar): %1", "结果(标量): %1"},
         {"Model: [%1]    Extensions: [%2]    Library: %3 images",
          "模型: [%1]    扩展包: [%2]    图库: %3 张图"},
+        {"Scene", "场景"},
+        {"Indoor", "室内"},
+        {"Top scenes", "Top 场景"},
+        {"Scene recognition unavailable", "场景识别不可用"},
     };
     return m;
 }

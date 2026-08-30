@@ -4,6 +4,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 
 namespace {
 bool isCoordProperty(const Expr* e);
@@ -687,6 +688,10 @@ Value Evaluator::evalMacroCall(const MacroCallExpr& node) {
         return evalImgMacro(node, m);
     }
 
+    if (m->is_scene) {
+        return evalSceneMacro(node, m);
+    }
+
     // AST macro (built-in object macro or user macro)
     if (node.args.size() != m->params.size()) {
         throw std::runtime_error("Macro '" + node.name + "' expects " +
@@ -899,9 +904,9 @@ Value Evaluator::evalColorMacro(const MacroCallExpr& node, const MacroDef* m) {
             case ColorFn::ImgColorful:
                 return Value::makeScore(clamp01(ia->avg_saturation * 2.0f));
             default: break;
-        }
-        return Value::makeScore(0.0f);
     }
+    return Value::makeScore(0.0f);
+}
 
     // Resolve the object: an explicit OBJECT arg, or broadcast the current object.
     Value objVal;
@@ -1138,6 +1143,62 @@ Value Evaluator::evalImgMacro(const MacroCallExpr& node, const MacroDef* m) {
             std::string s = strArg(0), sub = strArg(1);
             return Value::makeScore(s.find(sub) != std::string::npos ? 1.0f : 0.0f);
         }
+    }
+    return Value::makeScore(0.0f);
+}
+
+Value Evaluator::evalSceneMacro(const MacroCallExpr& node, const MacroDef* m) {
+    const ImageAttrs* ia = ctx_.getImageAttrs(ctx_.getCurrentImage());
+    const SceneFn fn = m->scene_fn;
+
+    // Scene data lives in the cached ImageAttrs; unavailable -> 0.0 / "".
+    auto score = [&](float v) { return Value::makeScore(ia ? clamp01(v) : 0.0f); };
+
+    switch (fn) {
+        case SceneFn::SceneProb: {
+            if (node.args.size() != 1) {
+                throw std::runtime_error("img_scene() expects one string argument");
+            }
+            Value v = evaluateExpr(*node.args[0]);
+            if (v.type != Value::STRING) {
+                throw std::runtime_error("img_scene() expects a string scene name");
+            }
+            if (!ia) return Value::makeScore(0.0f);
+            // Match the name case- and separator-insensitively
+            // (beach == "beach", "dining_room" == "dining room").
+            auto norm = [](const std::string& s) {
+                std::string out;
+                for (char c : s) {
+                    if (c == ' ' || c == '-' || c == '_') out.push_back('_');
+                    else out.push_back((char)std::tolower((unsigned char)c));
+                }
+                return out;
+            };
+            std::string q = norm(v.str_val);
+            const auto& labels = ctx_.getSceneLabels();
+            for (int i = 0; i < 365 && i < (int)labels.size(); ++i) {
+                if (norm(labels[i]) == q) return score(ia->scene_vector[i]);
+            }
+            // Also accept a raw index like img_scene("123").
+            try {
+                size_t pos = 0;
+                int idx = std::stoi(v.str_val, &pos);
+                if (pos == v.str_val.size() && idx >= 0 && idx < 365) return score(ia->scene_vector[idx]);
+            } catch (...) {}
+            return Value::makeScore(0.0f);
+        }
+        case SceneFn::SceneTop:
+            return Value::makeString(ia ? ia->dominant_scene : "");
+        case SceneFn::SceneVec: {
+            // Internal: expose the 365-dim vector as a HIST_VEC-like value is not
+            // supported by the DSL type system, so return the dominant score.
+            if (!ia) return Value::makeScore(0.0f);
+            float maxv = 0.0f;
+            for (float p : ia->scene_vector) maxv = std::max(maxv, p);
+            return Value::makeScore(maxv);
+        }
+        case SceneFn::IsIndoor:
+            return score(ia ? ia->indoor_score : 0.0f);
     }
     return Value::makeScore(0.0f);
 }

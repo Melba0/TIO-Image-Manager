@@ -134,6 +134,49 @@ $ : (cnt(animal) > 0)               # animal 及其全部子类（cat/dog/…）
 > `stop_sign`、`mobile_phone`）。父类别（`fruit`/`food`/`animal`/`vehicle`…）就是
 > 模型的直接输出类别。
 
+## 3.5 场景识别（Places365）
+
+在缓存预处理阶段，每张图片还会通过 **Places365** 场景模型（ONNX Runtime / CPU，纯 C++）
+计算一个 365 维场景概率向量，与物体检测并行、互不干扰。结果写入
+`cache_index.json` 的 `img_attrs`：
+
+```json
+"img_attrs": {
+  "...": "...",
+  "scene_vector": [0.01, 0.02, 0.85, ...],   // 365 个场景的概率
+  "dominant_scene": "beach",
+  "indoor_score": 0.12                        // P(室内) = 前 205 类概率之和
+}
+```
+
+DSL 场景宏（模型缺失时返回 0.0 / 空字符串，不报错）：
+
+| 宏 | 说明 | 示例 |
+|----|------|------|
+| `img_scene("name")` | 场景概率（0~1） | `$ : (img_scene("beach") > 0.7)` |
+| `img_scene_top()` | 概率最高的场景名 | `$ : (img_scene_top() == "forest")` |
+| `img_is_indoor()` | 室内概率（0~1） | `$ : (img_is_indoor() > 0.6 && any(class == "person"))` |
+| `img_scene_vec()` | 内部宏（返回最高概率） | — |
+
+场景名取自 `models/scene/categories_places365.txt`（365 行）；名称大小写、
+`-`/`_`/空格 均视为等价（`dining_room` == `dining room`）。
+
+**模型准备**（用户操作，一次性）：
+
+```powershell
+cd dsl
+# GoogLeNet（Caffe 官方权重，推荐）：
+python caffe_places365_to_onnx.py ../googlenet_places365.caffemodel \
+       models/scene/deploy_googlenet_places365.prototxt \
+       models/scene/places365_googlenet.onnx
+# 或 ResNet18（PyTorch 检查点）：
+python export_places365.py resnet18_places365.pth.tar models/scene/places365_googlenet.onnx
+# 并把 categories_places365.txt 放到 models/scene/（详见 models/scene/README.md）
+```
+
+> 场景识别与 YOLO 物体检测、颜色直方图、曝光/清晰度、EXIF、用户标记等特性平级，
+> 可同时使用；推理在缓存构建阶段完成，查询阶段只读缓存，单张图片场景推理 < 50ms（CPU）。
+
 ## 4. 标签预筛选（Tag Pre-Filter）
 
 在求值**之前**把 `$` 限制到 `user_tags` 匹配的图片，适合"先缩小范围再精确查询"。

@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QPushButton>
+#include <algorithm>
 
 namespace {
 
@@ -117,6 +118,22 @@ bool ImageDetailsDialog::loadEntry() {
     QString txt;
     txt += QString("<b>%1:</b> %2 x %3 px<br>")
                .arg(tr("Size")).arg(a["width"].toInt()).arg(a["height"].toInt());
+
+    // ---- Places365 scene recognition ----
+    QString dom = a["dominant_scene"].toString();
+    if (!dom.isEmpty()) {
+        txt += QString("<b>%1:</b> %2<br>").arg(tr("Scene")).arg(dom);
+        txt += tr("Indoor") + QString(": %1<br>").arg(a["indoor_score"].toDouble(), 0, 'f', 2);
+        // Top-5 scenes by probability (from scene_vector, needs the labels file).
+        QStringList top5 = topScenes(a);
+        if (!top5.isEmpty()) {
+            txt += QString("<b>%1</b><br>").arg(tr("Top scenes"));
+            for (const QString& line : top5) txt += line + "<br>";
+        }
+    } else {
+        txt += tr("Scene recognition unavailable") + "<br>";
+    }
+
     txt += QString("<b>%1</b><br>").arg(tr("Exposure"));
     txt += tr("Overexposure") + QString(": %1 &nbsp; ").arg(a["overexposure_score"].toDouble(), 0, 'f', 2)
          + tr("Underexposure") + QString(": %1 &nbsp; ").arg(a["underexposure_score"].toDouble(), 0, 'f', 2)
@@ -150,6 +167,37 @@ void ImageDetailsDialog::reloadTagsTable() {
         tagsTable_->setItem(row, 0, new QTableWidgetItem(it.key()));
         tagsTable_->setItem(row, 1, new QTableWidgetItem(it.value().toString()));
     }
+}
+
+QStringList ImageDetailsDialog::topScenes(const QJsonObject& attrs) const {
+    QStringList lines;
+    QJsonArray vec = attrs["scene_vector"].toArray();
+    if (vec.size() != 365) return lines;
+
+    // 365 scene names from models/scene/categories_places365.txt.
+    QStringList labels;
+    QFile lf(SettingsManager::projectDir() + "/models/scene/categories_places365.txt");
+    if (lf.open(QIODevice::ReadOnly)) {
+        for (const QByteArray& line : lf.readAll().split('\n')) {
+            QString s = QString::fromUtf8(line).trimmed();
+            if (!s.isEmpty()) labels << s;
+        }
+    }
+    if (labels.size() != 365) return lines;
+
+    // index the top 5 by probability
+    QVector<int> idx(365);
+    for (int i = 0; i < 365; ++i) idx[i] = i;
+    std::sort(idx.begin(), idx.end(), [&](int a, int b) {
+        return vec[a].toDouble() > vec[b].toDouble();
+    });
+    for (int i = 0; i < 5 && i < 365; ++i) {
+        lines << QString("%1. %2  (%3%)")
+                     .arg(i + 1)
+                     .arg(labels[idx[i]])
+                     .arg(vec[idx[i]].toDouble() * 100.0, 0, 'f', 1);
+    }
+    return lines;
 }
 
 void ImageDetailsDialog::saveTags() {

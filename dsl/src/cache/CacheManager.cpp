@@ -10,11 +10,13 @@ namespace fs = std::filesystem;
 CacheManager::CacheManager(const std::vector<std::string>& photo_dirs, const std::string& cache_root,
                            ModelRegistry& registry,
                            ObjectIdGenerator& id_gen,
-                           float fallback_threshold, float base_conf_threshold, float iou_threshold)
+                           float fallback_threshold, float base_conf_threshold, float iou_threshold,
+                           const std::string& scene_model_path, const std::string& scene_labels_path)
     : photo_dirs_(photo_dirs), cache_root_(cache_root), registry_(registry),
       id_gen_(id_gen),
       fallback_threshold_(fallback_threshold), base_conf_threshold_(base_conf_threshold),
-      iou_threshold_(iou_threshold) {
+      iou_threshold_(iou_threshold),
+      scene_model_path_(scene_model_path), scene_labels_path_(scene_labels_path) {
     if (photo_dirs_.empty()) photo_dirs_.push_back(fs::current_path().string());
     refreshCachePaths();
 }
@@ -243,6 +245,31 @@ bool CacheManager::inferEntry(const std::string& full_path, CacheEntry& e) {
 
     auto detections = yolo_->detect(full_path);
     e.img_attrs = yolo_->detectImageAttrs(full_path);
+
+    // ---- Places365 scene recognition (independent of YOLO, same raw image) ----
+    // Load the scene model lazily on first use; absent model = degrade to
+    // empty scene data (macros return 0.0 / "").
+    if (!scene_ && !scene_tried_) {
+        scene_tried_ = true;
+        if (!scene_model_path_.empty() && !scene_labels_path_.empty()) {
+            auto scene = std::make_unique<SceneInference>();
+            if (scene->loadModel(scene_model_path_, scene_labels_path_)) {
+                scene_ = std::move(scene);
+            } else {
+                std::cerr << "[Cache] Scene recognition disabled (model not loaded)." << std::endl;
+            }
+        } else {
+            std::cerr << "[Cache] Scene recognition disabled (no scene model configured)." << std::endl;
+        }
+    }
+    if (scene_) {
+        e.img_attrs.scene_vector = scene_->getSceneVector(full_path);
+        e.img_attrs.dominant_scene = scene_->getDominantScene(full_path);
+        // indoor = sum of the 205 indoor classes (indices 0..204).
+        double indoor = 0.0;
+        for (int i = 0; i < 205; ++i) indoor += e.img_attrs.scene_vector[i];
+        e.img_attrs.indoor_score = (float)indoor;
+    }
 
     e.objects.clear();
     for (const auto& det : detections) {

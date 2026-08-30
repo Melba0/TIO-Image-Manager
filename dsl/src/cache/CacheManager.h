@@ -7,6 +7,7 @@
 #include "Types.h"
 #include "ModelRegistry.h"
 #include "CacheIndex.h"
+#include "../scene/SceneInference.h"
 
 struct ImageCacheEntry {
     std::string path;
@@ -29,7 +30,9 @@ public:
                  ModelRegistry& registry,
                  ObjectIdGenerator& id_gen,
                  float fallback_threshold = 0.0f, float base_conf_threshold = 0.25f,
-                 float iou_threshold = 0.45f);
+                 float iou_threshold = 0.45f,
+                 const std::string& scene_model_path = "",
+                 const std::string& scene_labels_path = "");
 
     // Rebuild (if needed) then make sure the cache for the ACTIVE base model is loaded.
     bool ensureCacheReady();
@@ -106,6 +109,11 @@ private:
     PhotoCache cache_data_;
     bool cache_valid_ = false;
     std::unique_ptr<YoloInference> yolo_;
+    std::unique_ptr<SceneInference> scene_;
+
+    std::string scene_model_path_;
+    std::string scene_labels_path_;
+    bool scene_tried_ = false;
 
     std::unordered_map<std::string, size_t> image_index_;
 };

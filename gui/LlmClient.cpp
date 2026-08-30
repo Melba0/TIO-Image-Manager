@@ -194,6 +194,16 @@ You can call these directly as functions.
 - `img_bright()` : global brightness
 - `img_colorful()` : global colorfulness (saturation-based)
 
+**Scene recognition macros (Places365, whole image, use with `$`):**
+The engine classifies every photo into one of 365 scene categories during cache
+preprocessing.  Scene names are lowercase with underscores, e.g. `beach`, `kitchen`,
+`dining_room`, `forest`, `street`, `office`, `park`, `mountain`, `restaurant`,
+`living_room`, `bedroom`.  Use these macros to search by scene type:
+- `img_scene("beach")` : probability (0~1) that the photo is that scene
+- `img_scene_top()` : the single most-likely scene name (string)
+- `img_is_indoor()` : indoor probability (0~1)
+- Common use: `$ : (img_scene("beach") > 0.5)`, `$ : (img_is_indoor() > 0.6 && any(class == "person"))`
+
 **Color macros (single object, computed from attrs):**
 - `color(x, "name")` : fuzzy match to a named color (e.g. color(car, "red") -> 0~1)
 - `cct(x)` : correlated color temperature normalized to 0~1
@@ -245,6 +255,18 @@ out = ^(flowers : (any(warm && big)))
 **User:** Find images that are overall bluish.
 **DSL:** `out = $ : (img_color("blue") > 0.6)`
 
+**User:** Find beach photos.
+**DSL:** `out = $ : (img_scene("beach") > 0.5)`
+
+**User:** Find kitchen or dining room photos.
+**DSL:** `out = $ : (img_scene("kitchen") > 0.5 || img_scene("dining_room") > 0.5)`
+
+**User:** Find indoor photos that contain a person.
+**DSL:** `out = $ : (img_is_indoor() > 0.6 && any(class == "person"))`
+
+**User:** Find forest photos (the scene is most likely "forest").
+**DSL:** `out = $ : (img_scene_top() == "forest")`
+
 ## CRITICAL CONSTRAINTS
 1. Use **exact** class names from the `classes.json` above (lowercase, underscores for
    multi-word classes). Never invent, translate, or add spaces to class names.
@@ -252,6 +274,7 @@ out = ^(flowers : (any(warm && big)))
 3. **DO NOT** output anything other than the DSL code. No introductions, no apologies.
 4. When users mention parent classes (e.g., "fruit"), use `cnt(fruit)` or `any(fruit)` to automatically match all children.
 5. Always use the filter form `$ : ( ... )` and the condition functions `any(...)` / `all(...)` — never the old quantifier syntax.
+6. When the user asks for a scene/place type (beach, kitchen, office, bedroom, park, forest, street, ...), use the scene macros `img_scene("scene_name")` / `img_scene_top()` / `img_is_indoor()` rather than object classes.
 
 ---
 

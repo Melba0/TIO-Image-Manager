@@ -163,6 +163,15 @@ enum class ImgFn {
     StrContains     // str_contains(s, sub)  -> bool
 };
 
+// Built-in Places365 scene-recognition macros (read the cached scene_vector /
+// dominant_scene of the current image).
+enum class SceneFn {
+    SceneProb,      // img_scene(name)       -> score of that scene (0..1)
+    SceneTop,       // img_scene_top()       -> dominant scene name (string)
+    SceneVec,       // img_scene_vec()       -> full 365-dim vector (internal HIST_VEC-like)
+    IsIndoor        // img_is_indoor()       -> indoor probability (0..1)
+};
+
 // Unified macro definition table entry (built-in and user macros are identical here).
 struct MacroDef {
     std::vector<std::string> params;
@@ -175,6 +184,8 @@ struct MacroDef {
     HistFn hist_fn = HistFn::ObjHist;
     bool is_img = false;          // true -> evaluated by evalImgMacro()
     ImgFn img_fn = ImgFn::OverExposure;
+    bool is_scene = false;        // true -> evaluated by evalSceneMacro()
+    SceneFn scene_fn = SceneFn::SceneProb;
 
     static MacroDef ast(std::vector<std::string> params, std::shared_ptr<Expr> body) {
         MacroDef d;
@@ -207,6 +218,13 @@ struct MacroDef {
         MacroDef d;
         d.is_img = true;
         d.img_fn = fn;
+        d.params.resize(argc);
+        return d;
+    }
+    static MacroDef scene(SceneFn fn, int argc) {
+        MacroDef d;
+        d.is_scene = true;
+        d.scene_fn = fn;
         d.params.resize(argc);
         return d;
     }

@@ -32,6 +32,7 @@ A desktop image-retrieval tool made of two parts:
 | 可调推理阈值 | Configurable inference thresholds (base-conf / IoU / fallback) in the GUI settings page |
 | 增量缓存 | Incremental cache (`cache/<model>/cache_index.json`): only re-infers added/modified files |
 | 图像属性：曝光 / 清晰度 / EXIF / 用户标记 | Image attrs: exposure, blur, lightweight built-in EXIF reader, editable user tags |
+| Places365 场景识别（纯 C++/ONNX, CPU） | Scene recognition: 365-class Places365 vector cached per image, queried via `img_scene("beach")` / `img_scene_top()` / `img_is_indoor()` |
 | 直方图宏 | 32-bin hue histograms: `obj_hist` / `img_hist` / `hist_sim` / `hist_value` |
 | 标签预筛选（GUI 对话框 + `--tag-filter`） | Tag pre-filter pipeline: restrict `$` to images matching key-value tags (persisted) |
 | 资产管理（多选删除 / DSL `del`） | Asset management: multi-select delete in the grid, `del` statement in DSL |
@@ -79,15 +80,19 @@ tio/
 │   │   ├── parser/         # Lexer / Parser / AST（手写递归下降）
 │   │   ├── executor/       # Evaluator / Context / BuiltinMacros
 │   │   ├── cache/          # CacheManager（增量）+ CacheIndex + YoloInference(ONNX)
+│   │   ├── scene/          # SceneInference（Places365 场景识别，ONNX）
 │   │   ├── engine/         # OnnxInference（ONNX Runtime 后端）
 │   │   └── utils/          # filesystem_utils / exif_reader
 │   ├── models/
 │   │   ├── registry.json   # active_base / active_extensions
-│   │   └── base/yolov8m-oiv7/   # {model.onnx, meta.json, classes.json}
+│   │   ├── base/yolov8m-oiv7/   # {model.onnx, meta.json, classes.json}
+│   │   └── scene/          # Places365（.onnx + categories + meta.json，见其 README）
 │   ├── cache/              # 运行时生成 / generated at runtime
-│   ├── config/             # settings.ini（GUI 设置 + 推理阈值）+ config.json（兼容）
+│   ├── config/             # settings.ini（GUI 设置 + 推理阈值）
 │   ├── docs/               # 中文文档 / Chinese docs
-│   └── export_yolov8.py    # 模型导出 / Python model-export tool
+│   ├── export_yolov8.py    # 模型导出 / Python model-export tool
+│   ├── export_places365.py # Places365 导出 / scene-model export tool
+│   └── caffe_places365_to_onnx.py  # Caffe GoogLeNet -> ONNX / caffe scene converter
 └── gui/                    # Qt 6 桌面端 / the Qt GUI
     └── build/              # 产物 tio.exe + 伴生 dsl.exe（POST_BUILD 自动部署）
 ```

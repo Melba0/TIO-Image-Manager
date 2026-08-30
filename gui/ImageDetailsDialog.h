@@ -20,6 +20,7 @@ private:
     bool loadEntry();                 // read the image entry from cache_index.json
     void reloadTagsTable();
     void saveTags();
+    QStringList topScenes(const QJsonObject& attrs) const;  // top-5 "name (p%)" lines
 
     QString relPath_;
     QString fullPath_;
