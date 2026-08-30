@@ -36,6 +36,14 @@ public:
     QStringList tagFilters() const;   // list of "key=v1|v2"
     void setTagFilters(const QStringList& filters);
 
+    // --- Inference thresholds (persisted in [inference]) ---
+    double fallbackThreshold() const;    // confidence-degradation fallback (0 = off)
+    double baseConfThreshold() const;    // base detection confidence
+    double iouThreshold() const;         // NMS IoU
+    void setFallbackThreshold(double v);
+    void setBaseConfThreshold(double v);
+    void setIouThreshold(double v);
+
     // Generic passthrough to QSettings (for misc keys like general/*).
     QVariant value(const QString& key, const QVariant& def = QVariant()) const;
     void setValue(const QString& key, const QVariant& v);

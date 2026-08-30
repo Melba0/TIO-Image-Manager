@@ -13,8 +13,8 @@
 - **引擎**：C++17 DSL 解释器（`tio/dsl`，产物 `dsl.exe`），负责解析/求值 DSL、加载 ONNX
   模型推理、缓存管理、扩展包细化。
 - **推理后端**：ONNX Runtime（CPU），已完全移除 LibTorch。
-- **模型**：基座 `yolov8m.onnx`（COCO-80 检测）。
-- **数据**：图库在 `tio/photo`（128 张 COCO 图片）。
+- **模型**：基座 `yolov8m-oiv7.onnx`（Open Images V7，601 类，内置 fruit/food/animal/vehicle 等父类）。
+- **数据**：图库在 `tio/photo`（128 张图片）。
 
 ## 2. 架构总览
 
@@ -49,12 +49,12 @@ tio/
 │   │   └── utils/                # filesystem_utils（mtime/size）+ exif_reader（内置 EXIF）
 │   ├── models/
 │   │   ├── registry.json         # active_base / active_extensions
-│   │   ├── base/yolov8m/         # {model.onnx, meta.json, classes.json}
+│   │   ├── base/yolov8m-oiv7/    # {model.onnx, meta.json, classes.json}
 │   │   └── extensions/           # 扩展包（当前为空，见 §8）
 │   ├── cache/                    # 运行时生成：<model>/cache_index.json
-│   ├── config/                   # config.json(阈值) + settings.ini(GUI 设置)
+│   ├── config/                   # settings.ini(GUI 设置 + 推理阈值) + config.json(兼容)
 │   ├── docs/                     # 本目录
-│   └── *.py                      # 模型/配置生成工具（见 python_tools.md）
+│   └── *.py                      # 模型转换工具 export_yolov8.py（见 python_tools.md）
 └── gui/                          # Qt 项目（产物 gui/build/tio.exe + 伴生 dsl.exe）
 ```
 
@@ -75,10 +75,15 @@ tio/
 - `ModelRegistry` 只注册 `model.onnx`；CMake 链接 `onnxruntime::onnxruntime`，删除全部 LibTorch 依赖。
 - 已下载并部署 **ONNX Runtime 1.29.0**（`D:\Visual Studio Data\Modules\onnxruntime-1.29.0\...`）。
 
-### 4.3 模型切换为 yolov8m
-- `yolov8m.pt` → `export_yolov8.py` → `models/base/yolov8m/model.onnx`（输出 `(1,84,8400)`）。
-- 推理结果与旧 LibTorch 版一致（分数差 ~1e-6）。
-- `registry.json`：`active_base = "yolov8m"`。
+### 4.3 模型切换为 yolov8m-oiv7（Open Images V7）
+- `yolov8m-oiv7.pt` → `export_yolov8.py` → `models/base/yolov8m-oiv7/model.onnx`（输出 `(1,605,8400)`，601 类）。
+- 旧的 COCO-80 `yolov8m` 模型及 `make_classes.py`/`make_ext_model.py`/`export_ext_onnx.py` 已移除。
+- `classes.json` 的 601 个输出类别按模型输出下标排序，父类链来自 Open Images 官方层级，
+  统一小写；父类（fruit/food/animal/vehicle…）本身就是输出类别。
+- `registry.json`：`active_base = "yolov8m-oiv7"`。
+- 推理阈值已迁至 `config/settings.ini` 的 `[inference]`：`base_conf_threshold`(0.25)、
+  `iou_threshold`(0.45)、`fallback_threshold`(0，禁用置信度降级——OIV7 直接输出父类)。
+  `config/config.json` 仅在 settings.ini 缺失时兜底。
 
 ### 4.4 DSL 语法修正（重要）
 新语法（唯一推荐写法）：

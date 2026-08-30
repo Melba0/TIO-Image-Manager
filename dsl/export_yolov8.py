@@ -181,7 +181,7 @@ def main():
     with torch.no_grad():
         out = model(x)
     print("forward output:", tuple(out.shape))
-    assert out.dim() == 3 and out.size(1) == 84, f"unexpected output shape {tuple(out.shape)}"
+    assert out.dim() == 3 and out.size(1) >= 4, f"unexpected output shape {tuple(out.shape)}"
 
     torch.onnx.export(
         model, x, dst,

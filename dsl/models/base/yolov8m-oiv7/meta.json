@@ -1,6 +1,6 @@
 {
-  "name": "yolov8m",
+  "name": "yolov8m-oiv7",
   "type": "detector",
   "input_size": 640,
-  "classes": 80
+  "classes": 601
 }

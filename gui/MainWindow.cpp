@@ -165,7 +165,7 @@ void MainWindow::retranslateUi() {
     QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
     const QStringList settingTabs = {
         tr("General"), tr("API Config"), tr("Library"),
-        tr("Models"), tr("Extensions"), tr("Logs")};
+        tr("Models"), tr("Inference"), tr("Extensions"), tr("Logs")};
     for (int i = 0; i < settingTabs.size(); ++i) {
         QAction* act = settingsMenu->addAction(settingTabs[i]);
         connect(act, &QAction::triggered, this, [this, i]() { gotoSettings(i); });

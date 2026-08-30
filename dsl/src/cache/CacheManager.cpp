@@ -10,10 +10,11 @@ namespace fs = std::filesystem;
 CacheManager::CacheManager(const std::vector<std::string>& photo_dirs, const std::string& cache_root,
                            ModelRegistry& registry,
                            ObjectIdGenerator& id_gen,
-                           float fallback_threshold, float base_conf_threshold)
+                           float fallback_threshold, float base_conf_threshold, float iou_threshold)
     : photo_dirs_(photo_dirs), cache_root_(cache_root), registry_(registry),
       id_gen_(id_gen),
-      fallback_threshold_(fallback_threshold), base_conf_threshold_(base_conf_threshold) {
+      fallback_threshold_(fallback_threshold), base_conf_threshold_(base_conf_threshold),
+      iou_threshold_(iou_threshold) {
     if (photo_dirs_.empty()) photo_dirs_.push_back(fs::current_path().string());
     refreshCachePaths();
 }
@@ -231,7 +232,8 @@ bool CacheManager::inferEntry(const std::string& full_path, CacheEntry& e) {
         if (!base) return false;
         auto class_names = registry_.getOutputClassNames();
         yolo_ = std::make_unique<YoloInference>(base->path, class_names,
-                                                base->input_size, base_conf_threshold_);
+                                                base->input_size, base_conf_threshold_,
+                                                iou_threshold_);
         if (!yolo_->valid()) {
             std::cerr << "[Cache] Failed to load model: " << base->path << std::endl;
             yolo_.reset();

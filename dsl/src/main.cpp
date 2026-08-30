@@ -10,6 +10,7 @@
 #include <sstream>
 #include <cstdio>
 #include <iomanip>
+#include <cmath>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include "parser/Lexer.h"
@@ -456,17 +457,78 @@ int main(int argc, char* argv[]) {
     std::cout << "[Main] active base model: " << base->name << " (" << base->path << ")" << std::endl;
     std::cout << "[Main] photo dir: " << photo_dir << std::endl;
 
-    // Load configuration (confidence thresholds).
-    float fallback_threshold = 0.45f;
+    // Load configuration (confidence thresholds).  The GUI persists these in
+    // config/settings.ini under [inference] (written with QSettings); the
+    // engine also falls back to the legacy config/config.json keys.
+    const std::string settings_ini = (fs::path(project_dir) / "config" / "settings.ini").string();
+    const std::string config_json = (fs::path(project_dir) / "config" / "config.json").string();
+    float fallback_threshold = 0.0f;
     float base_conf_threshold = 0.25f;
-    try {
-        std::ifstream cfg_file((fs::path(project_dir) / "config" / "config.json").string());
-        if (cfg_file) {
-            auto cfg = nlohmann::json::parse(cfg_file);
-            fallback_threshold = cfg.value("conf_threshold", fallback_threshold);
-            base_conf_threshold = cfg.value("base_conf_threshold", base_conf_threshold);
+    float iou_threshold = 0.45f;
+
+    auto readIniFloat = [](const std::string& path, const std::string& section,
+                           const std::string& key, float def) -> float {
+        std::ifstream f(path);
+        if (!f) return def;
+        std::string line;
+        std::string cur_section;
+        while (std::getline(f, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            std::string t = line;
+            size_t b = t.find_first_not_of(" \t");
+            if (b == std::string::npos) continue;
+            t = t.substr(b);
+            if (t.empty() || t[0] == ';' || t[0] == '#') continue;
+            if (t.front() == '[') {
+                size_t close = t.find(']');
+                cur_section = (close == std::string::npos) ? "" : t.substr(1, close - 1);
+                continue;
+            }
+            size_t eq = t.find('=');
+            if (eq == std::string::npos) continue;
+            std::string k = t.substr(0, eq);
+            size_t kb = k.find_last_not_of(" \t");
+            if (kb == std::string::npos) continue;
+            k = k.substr(0, kb + 1);
+            if (cur_section != section || k != key) continue;
+            std::string v = t.substr(eq + 1);
+            size_t vb = v.find_first_not_of(" \t");
+            if (vb != std::string::npos) v = v.substr(vb);
+            size_t ve = v.find_last_not_of(" \t");
+            if (ve != std::string::npos) v = v.substr(0, ve + 1);
+            // QSettings quotes strings but numbers are written bare; strip any quotes.
+            if (v.size() >= 2 && v.front() == '"' && v.back() == '"') v = v.substr(1, v.size() - 2);
+            try {
+                return std::stof(v);
+            } catch (...) {
+                return def;
+            }
         }
-    } catch (...) {}
+        return def;
+    };
+
+    // Legacy config.json only supplies a value when settings.ini does not
+    // (settings.ini is the single source of truth the GUI writes).
+    {
+        float ini_fb = readIniFloat(settings_ini, "inference", "fallback_threshold", NAN);
+        float ini_bc = readIniFloat(settings_ini, "inference", "base_conf_threshold", NAN);
+        float ini_iou = readIniFloat(settings_ini, "inference", "iou_threshold", NAN);
+        try {
+            std::ifstream cfg_file(config_json);
+            if (cfg_file) {
+                auto cfg = nlohmann::json::parse(cfg_file);
+                if (std::isnan(ini_fb)) ini_fb = cfg.value("conf_threshold", fallback_threshold);
+                if (std::isnan(ini_bc)) ini_bc = cfg.value("base_conf_threshold", base_conf_threshold);
+            }
+        } catch (...) {}
+        if (!std::isnan(ini_fb)) fallback_threshold = ini_fb;
+        if (!std::isnan(ini_bc)) base_conf_threshold = ini_bc;
+        if (!std::isnan(ini_iou)) iou_threshold = ini_iou;
+    }
+
+    std::cout << "[Main] thresholds: base_conf=" << base_conf_threshold
+              << " iou=" << iou_threshold
+              << " fallback=" << fallback_threshold << std::endl;
 
     // Object id generator shared by cache builder and extension expansion.
     ObjectIdGenerator id_gen;
@@ -484,7 +546,7 @@ int main(int argc, char* argv[]) {
 
     CacheManager cache(photo_dirs, (fs::path(project_dir) / "cache").string(),
                        registry, id_gen,
-                       fallback_threshold, base_conf_threshold);
+                       fallback_threshold, base_conf_threshold, iou_threshold);
     if (!cache.ensureCacheReady()) {
         std::cerr << "Failed to load or build cache." << std::endl;
         return 1;

@@ -1,0 +1,2408 @@
+{
+  "classes": [
+    {
+      "name": "accordion",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "adhesive tape",
+      "parent": "office supplies"
+    },
+    {
+      "name": "aircraft",
+      "parent": "vehicle"
+    },
+    {
+      "name": "airplane",
+      "parent": "aircraft"
+    },
+    {
+      "name": "alarm clock",
+      "parent": "clock"
+    },
+    {
+      "name": "alpaca",
+      "parent": "mammal"
+    },
+    {
+      "name": "ambulance",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "animal",
+      "parent": "root"
+    },
+    {
+      "name": "ant",
+      "parent": "insect"
+    },
+    {
+      "name": "antelope",
+      "parent": "mammal"
+    },
+    {
+      "name": "apple",
+      "parent": "fruit"
+    },
+    {
+      "name": "armadillo",
+      "parent": "mammal"
+    },
+    {
+      "name": "artichoke",
+      "parent": "vegetable"
+    },
+    {
+      "name": "auto part",
+      "parent": "root"
+    },
+    {
+      "name": "axe",
+      "parent": "tool"
+    },
+    {
+      "name": "backpack",
+      "parent": "luggage and bags"
+    },
+    {
+      "name": "bagel",
+      "parent": "baked goods"
+    },
+    {
+      "name": "baked goods",
+      "parent": "food"
+    },
+    {
+      "name": "balance beam",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "ball",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "balloon",
+      "parent": "toy"
+    },
+    {
+      "name": "banana",
+      "parent": "fruit"
+    },
+    {
+      "name": "band-aid",
+      "parent": "medical equipment"
+    },
+    {
+      "name": "banjo",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "barge",
+      "parent": "boat"
+    },
+    {
+      "name": "barrel",
+      "parent": "container"
+    },
+    {
+      "name": "baseball bat",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "baseball glove",
+      "parent": "glove"
+    },
+    {
+      "name": "bat (animal)",
+      "parent": "root"
+    },
+    {
+      "name": "bathroom accessory",
+      "parent": "root"
+    },
+    {
+      "name": "bathroom cabinet",
+      "parent": "furniture"
+    },
+    {
+      "name": "bathtub",
+      "parent": "plumbing fixture"
+    },
+    {
+      "name": "beaker",
+      "parent": "container"
+    },
+    {
+      "name": "bear",
+      "parent": "carnivore"
+    },
+    {
+      "name": "bed",
+      "parent": "furniture"
+    },
+    {
+      "name": "bee",
+      "parent": "insect"
+    },
+    {
+      "name": "beehive",
+      "parent": "root"
+    },
+    {
+      "name": "beer",
+      "parent": "drink"
+    },
+    {
+      "name": "beetle",
+      "parent": "insect"
+    },
+    {
+      "name": "bell pepper",
+      "parent": "vegetable"
+    },
+    {
+      "name": "belt",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "bench",
+      "parent": "furniture"
+    },
+    {
+      "name": "bicycle",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "bicycle helmet",
+      "parent": "helmet"
+    },
+    {
+      "name": "bicycle wheel",
+      "parent": "root"
+    },
+    {
+      "name": "bidet",
+      "parent": "plumbing fixture"
+    },
+    {
+      "name": "billboard",
+      "parent": "root"
+    },
+    {
+      "name": "billiard table",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "binoculars",
+      "parent": "tool"
+    },
+    {
+      "name": "bird",
+      "parent": "animal"
+    },
+    {
+      "name": "blender",
+      "parent": "home appliance"
+    },
+    {
+      "name": "blue jay",
+      "parent": "bird"
+    },
+    {
+      "name": "boat",
+      "parent": "watercraft"
+    },
+    {
+      "name": "bomb",
+      "parent": "weapon"
+    },
+    {
+      "name": "book",
+      "parent": "root"
+    },
+    {
+      "name": "bookcase",
+      "parent": "furniture"
+    },
+    {
+      "name": "boot",
+      "parent": "footwear"
+    },
+    {
+      "name": "bottle",
+      "parent": "tableware"
+    },
+    {
+      "name": "bottle opener",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "bow and arrow",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "bowl",
+      "parent": "tableware"
+    },
+    {
+      "name": "bowling equipment",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "box",
+      "parent": "office supplies"
+    },
+    {
+      "name": "boy",
+      "parent": "person"
+    },
+    {
+      "name": "brassiere",
+      "parent": "clothing"
+    },
+    {
+      "name": "bread",
+      "parent": "baked goods"
+    },
+    {
+      "name": "briefcase",
+      "parent": "luggage and bags"
+    },
+    {
+      "name": "broccoli",
+      "parent": "vegetable"
+    },
+    {
+      "name": "bronze sculpture",
+      "parent": "sculpture"
+    },
+    {
+      "name": "brown bear",
+      "parent": "bear"
+    },
+    {
+      "name": "building",
+      "parent": "root"
+    },
+    {
+      "name": "bull",
+      "parent": "mammal"
+    },
+    {
+      "name": "burrito",
+      "parent": "food"
+    },
+    {
+      "name": "bus",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "bust",
+      "parent": "sculpture"
+    },
+    {
+      "name": "butterfly",
+      "parent": "moths and butterflies"
+    },
+    {
+      "name": "cabbage",
+      "parent": "vegetable"
+    },
+    {
+      "name": "cabinetry",
+      "parent": "furniture"
+    },
+    {
+      "name": "cake",
+      "parent": "dessert"
+    },
+    {
+      "name": "cake stand",
+      "parent": "tableware"
+    },
+    {
+      "name": "calculator",
+      "parent": "office supplies"
+    },
+    {
+      "name": "camel",
+      "parent": "mammal"
+    },
+    {
+      "name": "camera",
+      "parent": "tool"
+    },
+    {
+      "name": "can opener",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "canary",
+      "parent": "bird"
+    },
+    {
+      "name": "candle",
+      "parent": "root"
+    },
+    {
+      "name": "candy",
+      "parent": "dessert"
+    },
+    {
+      "name": "cannon",
+      "parent": "weapon"
+    },
+    {
+      "name": "canoe",
+      "parent": "boat"
+    },
+    {
+      "name": "cantaloupe",
+      "parent": "fruit"
+    },
+    {
+      "name": "car",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "carnivore",
+      "parent": "mammal"
+    },
+    {
+      "name": "carrot",
+      "parent": "vegetable"
+    },
+    {
+      "name": "cart",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "cassette deck",
+      "parent": "root"
+    },
+    {
+      "name": "castle",
+      "parent": "building"
+    },
+    {
+      "name": "cat",
+      "parent": "carnivore"
+    },
+    {
+      "name": "cat furniture",
+      "parent": "root"
+    },
+    {
+      "name": "caterpillar",
+      "parent": "moths and butterflies"
+    },
+    {
+      "name": "cattle",
+      "parent": "mammal"
+    },
+    {
+      "name": "ceiling fan",
+      "parent": "home appliance"
+    },
+    {
+      "name": "cello",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "centipede",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "chainsaw",
+      "parent": "tool"
+    },
+    {
+      "name": "chair",
+      "parent": "furniture"
+    },
+    {
+      "name": "cheese",
+      "parent": "dairy product"
+    },
+    {
+      "name": "cheetah",
+      "parent": "carnivore"
+    },
+    {
+      "name": "chest of drawers",
+      "parent": "furniture"
+    },
+    {
+      "name": "chicken",
+      "parent": "bird"
+    },
+    {
+      "name": "chime",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "chisel",
+      "parent": "tool"
+    },
+    {
+      "name": "chopsticks",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "christmas tree",
+      "parent": "tree"
+    },
+    {
+      "name": "clock",
+      "parent": "root"
+    },
+    {
+      "name": "closet",
+      "parent": "furniture"
+    },
+    {
+      "name": "clothing",
+      "parent": "root"
+    },
+    {
+      "name": "coat",
+      "parent": "clothing"
+    },
+    {
+      "name": "cocktail",
+      "parent": "drink"
+    },
+    {
+      "name": "cocktail shaker",
+      "parent": "tableware"
+    },
+    {
+      "name": "coconut",
+      "parent": "root"
+    },
+    {
+      "name": "coffee",
+      "parent": "drink"
+    },
+    {
+      "name": "coffee cup",
+      "parent": "tableware"
+    },
+    {
+      "name": "coffee table",
+      "parent": "table"
+    },
+    {
+      "name": "coffeemaker",
+      "parent": "home appliance"
+    },
+    {
+      "name": "coin",
+      "parent": "root"
+    },
+    {
+      "name": "common fig",
+      "parent": "fruit"
+    },
+    {
+      "name": "common sunflower",
+      "parent": "root"
+    },
+    {
+      "name": "computer keyboard",
+      "parent": "root"
+    },
+    {
+      "name": "computer monitor",
+      "parent": "root"
+    },
+    {
+      "name": "computer mouse",
+      "parent": "root"
+    },
+    {
+      "name": "container",
+      "parent": "tool"
+    },
+    {
+      "name": "convenience store",
+      "parent": "building"
+    },
+    {
+      "name": "cookie",
+      "parent": "snack"
+    },
+    {
+      "name": "cooking spray",
+      "parent": "food"
+    },
+    {
+      "name": "corded phone",
+      "parent": "telephone"
+    },
+    {
+      "name": "cosmetics",
+      "parent": "root"
+    },
+    {
+      "name": "couch",
+      "parent": "furniture"
+    },
+    {
+      "name": "countertop",
+      "parent": "root"
+    },
+    {
+      "name": "cowboy hat",
+      "parent": "hat"
+    },
+    {
+      "name": "crab",
+      "parent": "shellfish"
+    },
+    {
+      "name": "cream",
+      "parent": "personal care"
+    },
+    {
+      "name": "cricket ball",
+      "parent": "ball"
+    },
+    {
+      "name": "crocodile",
+      "parent": "reptile"
+    },
+    {
+      "name": "croissant",
+      "parent": "pastry"
+    },
+    {
+      "name": "crown",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "crutch",
+      "parent": "personal care"
+    },
+    {
+      "name": "cucumber",
+      "parent": "vegetable"
+    },
+    {
+      "name": "cupboard",
+      "parent": "furniture"
+    },
+    {
+      "name": "curtain",
+      "parent": "root"
+    },
+    {
+      "name": "cutting board",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "dagger",
+      "parent": "weapon"
+    },
+    {
+      "name": "dairy product",
+      "parent": "root"
+    },
+    {
+      "name": "deer",
+      "parent": "mammal"
+    },
+    {
+      "name": "desk",
+      "parent": "furniture"
+    },
+    {
+      "name": "dessert",
+      "parent": "food"
+    },
+    {
+      "name": "diaper",
+      "parent": "personal care"
+    },
+    {
+      "name": "dice",
+      "parent": "toy"
+    },
+    {
+      "name": "digital clock",
+      "parent": "clock"
+    },
+    {
+      "name": "dinosaur",
+      "parent": "reptile"
+    },
+    {
+      "name": "dishwasher",
+      "parent": "home appliance"
+    },
+    {
+      "name": "dog",
+      "parent": "carnivore"
+    },
+    {
+      "name": "dog bed",
+      "parent": "root"
+    },
+    {
+      "name": "doll",
+      "parent": "toy"
+    },
+    {
+      "name": "dolphin",
+      "parent": "marine mammal"
+    },
+    {
+      "name": "door",
+      "parent": "root"
+    },
+    {
+      "name": "door handle",
+      "parent": "root"
+    },
+    {
+      "name": "doughnut",
+      "parent": "pastry"
+    },
+    {
+      "name": "dragonfly",
+      "parent": "insect"
+    },
+    {
+      "name": "drawer",
+      "parent": "furniture"
+    },
+    {
+      "name": "dress",
+      "parent": "clothing"
+    },
+    {
+      "name": "drill (tool)",
+      "parent": "root"
+    },
+    {
+      "name": "drink",
+      "parent": "root"
+    },
+    {
+      "name": "drinking straw",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "drum",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "duck",
+      "parent": "bird"
+    },
+    {
+      "name": "dumbbell",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "eagle",
+      "parent": "bird"
+    },
+    {
+      "name": "earrings",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "egg (food)",
+      "parent": "root"
+    },
+    {
+      "name": "elephant",
+      "parent": "mammal"
+    },
+    {
+      "name": "envelope",
+      "parent": "office supplies"
+    },
+    {
+      "name": "eraser",
+      "parent": "office supplies"
+    },
+    {
+      "name": "face powder",
+      "parent": "cosmetics"
+    },
+    {
+      "name": "facial tissue holder",
+      "parent": "bathroom accessory"
+    },
+    {
+      "name": "falcon",
+      "parent": "bird"
+    },
+    {
+      "name": "fashion accessory",
+      "parent": "clothing"
+    },
+    {
+      "name": "fast food",
+      "parent": "food"
+    },
+    {
+      "name": "fax",
+      "parent": "office supplies"
+    },
+    {
+      "name": "fedora",
+      "parent": "hat"
+    },
+    {
+      "name": "filing cabinet",
+      "parent": "furniture"
+    },
+    {
+      "name": "fire hydrant",
+      "parent": "root"
+    },
+    {
+      "name": "fireplace",
+      "parent": "root"
+    },
+    {
+      "name": "fish",
+      "parent": "animal"
+    },
+    {
+      "name": "flag",
+      "parent": "root"
+    },
+    {
+      "name": "flashlight",
+      "parent": "tool"
+    },
+    {
+      "name": "flower",
+      "parent": "plant"
+    },
+    {
+      "name": "flowerpot",
+      "parent": "container"
+    },
+    {
+      "name": "flute",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "flying disc",
+      "parent": "toy"
+    },
+    {
+      "name": "food",
+      "parent": "root"
+    },
+    {
+      "name": "food processor",
+      "parent": "kitchen appliance"
+    },
+    {
+      "name": "football",
+      "parent": "ball"
+    },
+    {
+      "name": "football helmet",
+      "parent": "helmet"
+    },
+    {
+      "name": "footwear",
+      "parent": "clothing"
+    },
+    {
+      "name": "fork",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "fountain",
+      "parent": "root"
+    },
+    {
+      "name": "fox",
+      "parent": "carnivore"
+    },
+    {
+      "name": "french fries",
+      "parent": "fast food"
+    },
+    {
+      "name": "french horn",
+      "parent": "root"
+    },
+    {
+      "name": "frog",
+      "parent": "reptile"
+    },
+    {
+      "name": "fruit",
+      "parent": "food"
+    },
+    {
+      "name": "frying pan",
+      "parent": "kitchenware"
+    },
+    {
+      "name": "furniture",
+      "parent": "root"
+    },
+    {
+      "name": "garden asparagus",
+      "parent": "root"
+    },
+    {
+      "name": "gas stove",
+      "parent": "home appliance"
+    },
+    {
+      "name": "giraffe",
+      "parent": "mammal"
+    },
+    {
+      "name": "girl",
+      "parent": "person"
+    },
+    {
+      "name": "glasses",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "glove",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "goat",
+      "parent": "mammal"
+    },
+    {
+      "name": "goggles",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "goldfish",
+      "parent": "fish"
+    },
+    {
+      "name": "golf ball",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "golf cart",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "gondola",
+      "parent": "boat"
+    },
+    {
+      "name": "goose",
+      "parent": "bird"
+    },
+    {
+      "name": "grape",
+      "parent": "fruit"
+    },
+    {
+      "name": "grapefruit",
+      "parent": "fruit"
+    },
+    {
+      "name": "grinder",
+      "parent": "tool"
+    },
+    {
+      "name": "guacamole",
+      "parent": "food"
+    },
+    {
+      "name": "guitar",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "hair dryer",
+      "parent": "home appliance"
+    },
+    {
+      "name": "hair spray",
+      "parent": "cosmetics"
+    },
+    {
+      "name": "hamburger",
+      "parent": "sandwich"
+    },
+    {
+      "name": "hammer",
+      "parent": "tool"
+    },
+    {
+      "name": "hamster",
+      "parent": "mammal"
+    },
+    {
+      "name": "hand dryer",
+      "parent": "home appliance"
+    },
+    {
+      "name": "handbag",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "handgun",
+      "parent": "weapon"
+    },
+    {
+      "name": "harbor seal",
+      "parent": "marine mammal"
+    },
+    {
+      "name": "harmonica",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "harp",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "harpsichord",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "hat",
+      "parent": "clothing"
+    },
+    {
+      "name": "headphones",
+      "parent": "root"
+    },
+    {
+      "name": "heater",
+      "parent": "home appliance"
+    },
+    {
+      "name": "hedgehog",
+      "parent": "mammal"
+    },
+    {
+      "name": "helicopter",
+      "parent": "aircraft"
+    },
+    {
+      "name": "helmet",
+      "parent": "clothing"
+    },
+    {
+      "name": "high heels",
+      "parent": "footwear"
+    },
+    {
+      "name": "hiking equipment",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "hippopotamus",
+      "parent": "mammal"
+    },
+    {
+      "name": "home appliance",
+      "parent": "root"
+    },
+    {
+      "name": "honeycomb",
+      "parent": "food"
+    },
+    {
+      "name": "horizontal bar",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "horse",
+      "parent": "mammal"
+    },
+    {
+      "name": "hot dog",
+      "parent": "fast food"
+    },
+    {
+      "name": "house",
+      "parent": "building"
+    },
+    {
+      "name": "houseplant",
+      "parent": "plant"
+    },
+    {
+      "name": "human arm",
+      "parent": "root"
+    },
+    {
+      "name": "human beard",
+      "parent": "root"
+    },
+    {
+      "name": "human body",
+      "parent": "root"
+    },
+    {
+      "name": "human ear",
+      "parent": "root"
+    },
+    {
+      "name": "human eye",
+      "parent": "root"
+    },
+    {
+      "name": "human face",
+      "parent": "root"
+    },
+    {
+      "name": "human foot",
+      "parent": "root"
+    },
+    {
+      "name": "human hair",
+      "parent": "root"
+    },
+    {
+      "name": "human hand",
+      "parent": "root"
+    },
+    {
+      "name": "human head",
+      "parent": "root"
+    },
+    {
+      "name": "human leg",
+      "parent": "root"
+    },
+    {
+      "name": "human mouth",
+      "parent": "root"
+    },
+    {
+      "name": "human nose",
+      "parent": "root"
+    },
+    {
+      "name": "humidifier",
+      "parent": "home appliance"
+    },
+    {
+      "name": "ice cream",
+      "parent": "dessert"
+    },
+    {
+      "name": "indoor rower",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "infant bed",
+      "parent": "bed"
+    },
+    {
+      "name": "insect",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "invertebrate",
+      "parent": "animal"
+    },
+    {
+      "name": "ipod",
+      "parent": "root"
+    },
+    {
+      "name": "isopod",
+      "parent": "marine invertebrates"
+    },
+    {
+      "name": "jacket",
+      "parent": "clothing"
+    },
+    {
+      "name": "jacuzzi",
+      "parent": "root"
+    },
+    {
+      "name": "jaguar (animal)",
+      "parent": "root"
+    },
+    {
+      "name": "jeans",
+      "parent": "trousers"
+    },
+    {
+      "name": "jellyfish",
+      "parent": "marine invertebrates"
+    },
+    {
+      "name": "jet ski",
+      "parent": "watercraft"
+    },
+    {
+      "name": "jug",
+      "parent": "tableware"
+    },
+    {
+      "name": "juice",
+      "parent": "drink"
+    },
+    {
+      "name": "kangaroo",
+      "parent": "mammal"
+    },
+    {
+      "name": "kettle",
+      "parent": "home appliance"
+    },
+    {
+      "name": "kitchen & dining room table",
+      "parent": "table"
+    },
+    {
+      "name": "kitchen appliance",
+      "parent": "kitchenware"
+    },
+    {
+      "name": "kitchen knife",
+      "parent": "tableware"
+    },
+    {
+      "name": "kitchen utensil",
+      "parent": "kitchenware"
+    },
+    {
+      "name": "kitchenware",
+      "parent": "root"
+    },
+    {
+      "name": "kite",
+      "parent": "toy"
+    },
+    {
+      "name": "knife",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "koala",
+      "parent": "mammal"
+    },
+    {
+      "name": "ladder",
+      "parent": "tool"
+    },
+    {
+      "name": "ladle",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "ladybug",
+      "parent": "beetle"
+    },
+    {
+      "name": "lamp",
+      "parent": "root"
+    },
+    {
+      "name": "land vehicle",
+      "parent": "vehicle"
+    },
+    {
+      "name": "lantern",
+      "parent": "root"
+    },
+    {
+      "name": "laptop",
+      "parent": "root"
+    },
+    {
+      "name": "lavender (plant)",
+      "parent": "root"
+    },
+    {
+      "name": "lemon",
+      "parent": "fruit"
+    },
+    {
+      "name": "leopard",
+      "parent": "carnivore"
+    },
+    {
+      "name": "light bulb",
+      "parent": "root"
+    },
+    {
+      "name": "light switch",
+      "parent": "root"
+    },
+    {
+      "name": "lighthouse",
+      "parent": "building"
+    },
+    {
+      "name": "lily",
+      "parent": "flower"
+    },
+    {
+      "name": "limousine",
+      "parent": "car"
+    },
+    {
+      "name": "lion",
+      "parent": "carnivore"
+    },
+    {
+      "name": "lipstick",
+      "parent": "cosmetics"
+    },
+    {
+      "name": "lizard",
+      "parent": "reptile"
+    },
+    {
+      "name": "lobster",
+      "parent": "shellfish"
+    },
+    {
+      "name": "loveseat",
+      "parent": "couch"
+    },
+    {
+      "name": "luggage and bags",
+      "parent": "clothing"
+    },
+    {
+      "name": "lynx",
+      "parent": "carnivore"
+    },
+    {
+      "name": "magpie",
+      "parent": "bird"
+    },
+    {
+      "name": "mammal",
+      "parent": "animal"
+    },
+    {
+      "name": "man",
+      "parent": "person"
+    },
+    {
+      "name": "mango",
+      "parent": "fruit"
+    },
+    {
+      "name": "maple",
+      "parent": "tree"
+    },
+    {
+      "name": "maracas",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "marine invertebrates",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "marine mammal",
+      "parent": "mammal"
+    },
+    {
+      "name": "measuring cup",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "mechanical fan",
+      "parent": "home appliance"
+    },
+    {
+      "name": "medical equipment",
+      "parent": "root"
+    },
+    {
+      "name": "microphone",
+      "parent": "root"
+    },
+    {
+      "name": "microwave oven",
+      "parent": "home appliance"
+    },
+    {
+      "name": "milk",
+      "parent": "dairy product"
+    },
+    {
+      "name": "miniskirt",
+      "parent": "skirt"
+    },
+    {
+      "name": "mirror",
+      "parent": "root"
+    },
+    {
+      "name": "missile",
+      "parent": "weapon"
+    },
+    {
+      "name": "mixer",
+      "parent": "home appliance"
+    },
+    {
+      "name": "mixing bowl",
+      "parent": "tableware"
+    },
+    {
+      "name": "mobile phone",
+      "parent": "telephone"
+    },
+    {
+      "name": "monkey",
+      "parent": "mammal"
+    },
+    {
+      "name": "moths and butterflies",
+      "parent": "insect"
+    },
+    {
+      "name": "motorcycle",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "mouse",
+      "parent": "mammal"
+    },
+    {
+      "name": "muffin",
+      "parent": "dessert"
+    },
+    {
+      "name": "mug",
+      "parent": "tableware"
+    },
+    {
+      "name": "mule",
+      "parent": "mammal"
+    },
+    {
+      "name": "mushroom",
+      "parent": "food"
+    },
+    {
+      "name": "musical instrument",
+      "parent": "root"
+    },
+    {
+      "name": "musical keyboard",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "nail (construction)",
+      "parent": "root"
+    },
+    {
+      "name": "necklace",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "nightstand",
+      "parent": "furniture"
+    },
+    {
+      "name": "oboe",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "office building",
+      "parent": "building"
+    },
+    {
+      "name": "office supplies",
+      "parent": "root"
+    },
+    {
+      "name": "orange",
+      "parent": "fruit"
+    },
+    {
+      "name": "organ (musical instrument)",
+      "parent": "root"
+    },
+    {
+      "name": "ostrich",
+      "parent": "bird"
+    },
+    {
+      "name": "otter",
+      "parent": "carnivore"
+    },
+    {
+      "name": "oven",
+      "parent": "home appliance"
+    },
+    {
+      "name": "owl",
+      "parent": "bird"
+    },
+    {
+      "name": "oyster",
+      "parent": "shellfish"
+    },
+    {
+      "name": "paddle",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "palm tree",
+      "parent": "tree"
+    },
+    {
+      "name": "pancake",
+      "parent": "food"
+    },
+    {
+      "name": "panda",
+      "parent": "bear"
+    },
+    {
+      "name": "paper cutter",
+      "parent": "office supplies"
+    },
+    {
+      "name": "paper towel",
+      "parent": "root"
+    },
+    {
+      "name": "parachute",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "parking meter",
+      "parent": "root"
+    },
+    {
+      "name": "parrot",
+      "parent": "bird"
+    },
+    {
+      "name": "pasta",
+      "parent": "food"
+    },
+    {
+      "name": "pastry",
+      "parent": "baked goods"
+    },
+    {
+      "name": "peach",
+      "parent": "fruit"
+    },
+    {
+      "name": "pear",
+      "parent": "fruit"
+    },
+    {
+      "name": "pen",
+      "parent": "office supplies"
+    },
+    {
+      "name": "pencil case",
+      "parent": "office supplies"
+    },
+    {
+      "name": "pencil sharpener",
+      "parent": "office supplies"
+    },
+    {
+      "name": "penguin",
+      "parent": "bird"
+    },
+    {
+      "name": "perfume",
+      "parent": "cosmetics"
+    },
+    {
+      "name": "person",
+      "parent": "root"
+    },
+    {
+      "name": "personal care",
+      "parent": "root"
+    },
+    {
+      "name": "personal flotation device",
+      "parent": "root"
+    },
+    {
+      "name": "piano",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "picnic basket",
+      "parent": "container"
+    },
+    {
+      "name": "picture frame",
+      "parent": "root"
+    },
+    {
+      "name": "pig",
+      "parent": "mammal"
+    },
+    {
+      "name": "pillow",
+      "parent": "root"
+    },
+    {
+      "name": "pineapple",
+      "parent": "fruit"
+    },
+    {
+      "name": "pitcher (container)",
+      "parent": "root"
+    },
+    {
+      "name": "pizza",
+      "parent": "food"
+    },
+    {
+      "name": "pizza cutter",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "plant",
+      "parent": "root"
+    },
+    {
+      "name": "plastic bag",
+      "parent": "office supplies"
+    },
+    {
+      "name": "plate",
+      "parent": "tableware"
+    },
+    {
+      "name": "platter",
+      "parent": "tableware"
+    },
+    {
+      "name": "plumbing fixture",
+      "parent": "root"
+    },
+    {
+      "name": "polar bear",
+      "parent": "bear"
+    },
+    {
+      "name": "pomegranate",
+      "parent": "fruit"
+    },
+    {
+      "name": "popcorn",
+      "parent": "snack"
+    },
+    {
+      "name": "porch",
+      "parent": "root"
+    },
+    {
+      "name": "porcupine",
+      "parent": "mammal"
+    },
+    {
+      "name": "poster",
+      "parent": "office supplies"
+    },
+    {
+      "name": "potato",
+      "parent": "vegetable"
+    },
+    {
+      "name": "power plugs and sockets",
+      "parent": "root"
+    },
+    {
+      "name": "pressure cooker",
+      "parent": "kitchen appliance"
+    },
+    {
+      "name": "pretzel",
+      "parent": "snack"
+    },
+    {
+      "name": "printer",
+      "parent": "root"
+    },
+    {
+      "name": "pumpkin",
+      "parent": "squash (plant)"
+    },
+    {
+      "name": "punching bag",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "rabbit",
+      "parent": "mammal"
+    },
+    {
+      "name": "raccoon",
+      "parent": "carnivore"
+    },
+    {
+      "name": "racket",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "radish",
+      "parent": "vegetable"
+    },
+    {
+      "name": "ratchet (device)",
+      "parent": "root"
+    },
+    {
+      "name": "raven",
+      "parent": "bird"
+    },
+    {
+      "name": "rays and skates",
+      "parent": "fish"
+    },
+    {
+      "name": "red panda",
+      "parent": "carnivore"
+    },
+    {
+      "name": "refrigerator",
+      "parent": "home appliance"
+    },
+    {
+      "name": "remote control",
+      "parent": "root"
+    },
+    {
+      "name": "reptile",
+      "parent": "animal"
+    },
+    {
+      "name": "rhinoceros",
+      "parent": "mammal"
+    },
+    {
+      "name": "rifle",
+      "parent": "weapon"
+    },
+    {
+      "name": "ring binder",
+      "parent": "office supplies"
+    },
+    {
+      "name": "rocket",
+      "parent": "aircraft"
+    },
+    {
+      "name": "roller skates",
+      "parent": "footwear"
+    },
+    {
+      "name": "rose",
+      "parent": "flower"
+    },
+    {
+      "name": "rugby ball",
+      "parent": "ball"
+    },
+    {
+      "name": "ruler",
+      "parent": "tool"
+    },
+    {
+      "name": "salad",
+      "parent": "vegetable"
+    },
+    {
+      "name": "salt and pepper shakers",
+      "parent": "tableware"
+    },
+    {
+      "name": "sandal",
+      "parent": "footwear"
+    },
+    {
+      "name": "sandwich",
+      "parent": "food"
+    },
+    {
+      "name": "saucer",
+      "parent": "tableware"
+    },
+    {
+      "name": "saxophone",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "scale",
+      "parent": "tool"
+    },
+    {
+      "name": "scarf",
+      "parent": "clothing"
+    },
+    {
+      "name": "scissors",
+      "parent": "office supplies"
+    },
+    {
+      "name": "scoreboard",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "scorpion",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "screwdriver",
+      "parent": "tool"
+    },
+    {
+      "name": "sculpture",
+      "parent": "root"
+    },
+    {
+      "name": "sea lion",
+      "parent": "marine mammal"
+    },
+    {
+      "name": "sea turtle",
+      "parent": "turtle"
+    },
+    {
+      "name": "seafood",
+      "parent": "food"
+    },
+    {
+      "name": "seahorse",
+      "parent": "fish"
+    },
+    {
+      "name": "seat belt",
+      "parent": "auto part"
+    },
+    {
+      "name": "segway",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "serving tray",
+      "parent": "tableware"
+    },
+    {
+      "name": "sewing machine",
+      "parent": "home appliance"
+    },
+    {
+      "name": "shark",
+      "parent": "fish"
+    },
+    {
+      "name": "sheep",
+      "parent": "mammal"
+    },
+    {
+      "name": "shelf",
+      "parent": "furniture"
+    },
+    {
+      "name": "shellfish",
+      "parent": "seafood"
+    },
+    {
+      "name": "shirt",
+      "parent": "clothing"
+    },
+    {
+      "name": "shorts",
+      "parent": "clothing"
+    },
+    {
+      "name": "shotgun",
+      "parent": "weapon"
+    },
+    {
+      "name": "shower",
+      "parent": "plumbing fixture"
+    },
+    {
+      "name": "shrimp",
+      "parent": "shellfish"
+    },
+    {
+      "name": "sink",
+      "parent": "plumbing fixture"
+    },
+    {
+      "name": "skateboard",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "ski",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "skirt",
+      "parent": "clothing"
+    },
+    {
+      "name": "skull",
+      "parent": "root"
+    },
+    {
+      "name": "skunk",
+      "parent": "mammal"
+    },
+    {
+      "name": "skyscraper",
+      "parent": "building"
+    },
+    {
+      "name": "slow cooker",
+      "parent": "kitchen appliance"
+    },
+    {
+      "name": "snack",
+      "parent": "food"
+    },
+    {
+      "name": "snail",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "snake",
+      "parent": "reptile"
+    },
+    {
+      "name": "snowboard",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "snowman",
+      "parent": "sculpture"
+    },
+    {
+      "name": "snowmobile",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "snowplow",
+      "parent": "tool"
+    },
+    {
+      "name": "soap dispenser",
+      "parent": "bathroom accessory"
+    },
+    {
+      "name": "sock",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "sofa bed",
+      "parent": "couch"
+    },
+    {
+      "name": "sombrero",
+      "parent": "hat"
+    },
+    {
+      "name": "sparrow",
+      "parent": "bird"
+    },
+    {
+      "name": "spatula",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "spice rack",
+      "parent": "kitchenware"
+    },
+    {
+      "name": "spider",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "spoon",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "sports equipment",
+      "parent": "root"
+    },
+    {
+      "name": "sports uniform",
+      "parent": "clothing"
+    },
+    {
+      "name": "squash (plant)",
+      "parent": "root"
+    },
+    {
+      "name": "squid",
+      "parent": "seafood"
+    },
+    {
+      "name": "squirrel",
+      "parent": "mammal"
+    },
+    {
+      "name": "stairs",
+      "parent": "root"
+    },
+    {
+      "name": "stapler",
+      "parent": "office supplies"
+    },
+    {
+      "name": "starfish",
+      "parent": "marine invertebrates"
+    },
+    {
+      "name": "stationary bicycle",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "stethoscope",
+      "parent": "medical equipment"
+    },
+    {
+      "name": "stool",
+      "parent": "furniture"
+    },
+    {
+      "name": "stop sign",
+      "parent": "traffic sign"
+    },
+    {
+      "name": "strawberry",
+      "parent": "fruit"
+    },
+    {
+      "name": "street light",
+      "parent": "root"
+    },
+    {
+      "name": "stretcher",
+      "parent": "medical equipment"
+    },
+    {
+      "name": "studio couch",
+      "parent": "bed"
+    },
+    {
+      "name": "submarine",
+      "parent": "watercraft"
+    },
+    {
+      "name": "submarine sandwich",
+      "parent": "sandwich"
+    },
+    {
+      "name": "suit",
+      "parent": "clothing"
+    },
+    {
+      "name": "suitcase",
+      "parent": "luggage and bags"
+    },
+    {
+      "name": "sun hat",
+      "parent": "hat"
+    },
+    {
+      "name": "sunglasses",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "surfboard",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "sushi",
+      "parent": "food"
+    },
+    {
+      "name": "swan",
+      "parent": "bird"
+    },
+    {
+      "name": "swim cap",
+      "parent": "clothing"
+    },
+    {
+      "name": "swimming pool",
+      "parent": "root"
+    },
+    {
+      "name": "swimwear",
+      "parent": "clothing"
+    },
+    {
+      "name": "sword",
+      "parent": "weapon"
+    },
+    {
+      "name": "syringe",
+      "parent": "medical equipment"
+    },
+    {
+      "name": "table",
+      "parent": "furniture"
+    },
+    {
+      "name": "table tennis racket",
+      "parent": "racket"
+    },
+    {
+      "name": "tablet computer",
+      "parent": "root"
+    },
+    {
+      "name": "tableware",
+      "parent": "kitchenware"
+    },
+    {
+      "name": "taco",
+      "parent": "food"
+    },
+    {
+      "name": "tank",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "tap",
+      "parent": "plumbing fixture"
+    },
+    {
+      "name": "tart",
+      "parent": "pastry"
+    },
+    {
+      "name": "taxi",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "tea",
+      "parent": "drink"
+    },
+    {
+      "name": "teapot",
+      "parent": "tableware"
+    },
+    {
+      "name": "teddy bear",
+      "parent": "toy"
+    },
+    {
+      "name": "telephone",
+      "parent": "root"
+    },
+    {
+      "name": "television",
+      "parent": "root"
+    },
+    {
+      "name": "tennis ball",
+      "parent": "ball"
+    },
+    {
+      "name": "tennis racket",
+      "parent": "racket"
+    },
+    {
+      "name": "tent",
+      "parent": "root"
+    },
+    {
+      "name": "tiara",
+      "parent": "clothing"
+    },
+    {
+      "name": "tick",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "tie",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "tiger",
+      "parent": "carnivore"
+    },
+    {
+      "name": "tin can",
+      "parent": "container"
+    },
+    {
+      "name": "tire",
+      "parent": "auto part"
+    },
+    {
+      "name": "toaster",
+      "parent": "home appliance"
+    },
+    {
+      "name": "toilet",
+      "parent": "plumbing fixture"
+    },
+    {
+      "name": "toilet paper",
+      "parent": "office supplies"
+    },
+    {
+      "name": "tomato",
+      "parent": "fruit"
+    },
+    {
+      "name": "tool",
+      "parent": "root"
+    },
+    {
+      "name": "toothbrush",
+      "parent": "personal care"
+    },
+    {
+      "name": "torch",
+      "parent": "tool"
+    },
+    {
+      "name": "tortoise",
+      "parent": "turtle"
+    },
+    {
+      "name": "towel",
+      "parent": "bathroom accessory"
+    },
+    {
+      "name": "tower",
+      "parent": "building"
+    },
+    {
+      "name": "toy",
+      "parent": "root"
+    },
+    {
+      "name": "traffic light",
+      "parent": "root"
+    },
+    {
+      "name": "traffic sign",
+      "parent": "root"
+    },
+    {
+      "name": "train",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "training bench",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "treadmill",
+      "parent": "sports equipment"
+    },
+    {
+      "name": "tree",
+      "parent": "plant"
+    },
+    {
+      "name": "tree house",
+      "parent": "building"
+    },
+    {
+      "name": "tripod",
+      "parent": "tool"
+    },
+    {
+      "name": "trombone",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "trousers",
+      "parent": "clothing"
+    },
+    {
+      "name": "truck",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "trumpet",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "turkey",
+      "parent": "bird"
+    },
+    {
+      "name": "turtle",
+      "parent": "reptile"
+    },
+    {
+      "name": "umbrella",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "unicycle",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "van",
+      "parent": "car"
+    },
+    {
+      "name": "vase",
+      "parent": "root"
+    },
+    {
+      "name": "vegetable",
+      "parent": "food"
+    },
+    {
+      "name": "vehicle",
+      "parent": "root"
+    },
+    {
+      "name": "vehicle registration plate",
+      "parent": "auto part"
+    },
+    {
+      "name": "violin",
+      "parent": "musical instrument"
+    },
+    {
+      "name": "volleyball (ball)",
+      "parent": "root"
+    },
+    {
+      "name": "waffle",
+      "parent": "food"
+    },
+    {
+      "name": "waffle iron",
+      "parent": "kitchen appliance"
+    },
+    {
+      "name": "wall clock",
+      "parent": "furniture"
+    },
+    {
+      "name": "wardrobe",
+      "parent": "furniture"
+    },
+    {
+      "name": "washing machine",
+      "parent": "home appliance"
+    },
+    {
+      "name": "waste container",
+      "parent": "container"
+    },
+    {
+      "name": "watch",
+      "parent": "fashion accessory"
+    },
+    {
+      "name": "watercraft",
+      "parent": "vehicle"
+    },
+    {
+      "name": "watermelon",
+      "parent": "fruit"
+    },
+    {
+      "name": "weapon",
+      "parent": "root"
+    },
+    {
+      "name": "whale",
+      "parent": "marine mammal"
+    },
+    {
+      "name": "wheel",
+      "parent": "auto part"
+    },
+    {
+      "name": "wheelchair",
+      "parent": "land vehicle"
+    },
+    {
+      "name": "whisk",
+      "parent": "kitchen utensil"
+    },
+    {
+      "name": "whiteboard",
+      "parent": "office supplies"
+    },
+    {
+      "name": "willow",
+      "parent": "tree"
+    },
+    {
+      "name": "window",
+      "parent": "root"
+    },
+    {
+      "name": "window blind",
+      "parent": "root"
+    },
+    {
+      "name": "wine",
+      "parent": "drink"
+    },
+    {
+      "name": "wine glass",
+      "parent": "tableware"
+    },
+    {
+      "name": "wine rack",
+      "parent": "furniture"
+    },
+    {
+      "name": "winter melon",
+      "parent": "vegetable"
+    },
+    {
+      "name": "wok",
+      "parent": "kitchenware"
+    },
+    {
+      "name": "woman",
+      "parent": "person"
+    },
+    {
+      "name": "wood-burning stove",
+      "parent": "home appliance"
+    },
+    {
+      "name": "woodpecker",
+      "parent": "bird"
+    },
+    {
+      "name": "worm",
+      "parent": "invertebrate"
+    },
+    {
+      "name": "wrench",
+      "parent": "tool"
+    },
+    {
+      "name": "zebra",
+      "parent": "mammal"
+    },
+    {
+      "name": "zucchini",
+      "parent": "squash (plant)"
+    }
+  ]
+}

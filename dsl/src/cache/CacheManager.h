@@ -28,7 +28,8 @@ public:
     CacheManager(const std::vector<std::string>& photo_dirs, const std::string& cache_root,
                  ModelRegistry& registry,
                  ObjectIdGenerator& id_gen,
-                 float fallback_threshold = 0.45f, float base_conf_threshold = 0.25f);
+                 float fallback_threshold = 0.0f, float base_conf_threshold = 0.25f,
+                 float iou_threshold = 0.45f);
 
     // Rebuild (if needed) then make sure the cache for the ACTIVE base model is loaded.
     bool ensureCacheReady();
@@ -96,6 +97,7 @@ private:
     ObjectIdGenerator& id_gen_;
     float fallback_threshold_;
     float base_conf_threshold_;
+    float iou_threshold_;
 
     // Prefix helper for cache image paths.
     std::string relImagePath(const std::string& dir, const std::string& file) const;

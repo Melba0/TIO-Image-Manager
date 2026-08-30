@@ -1,5 +1,5 @@
 {
-    "active_base": "yolov8m",
+    "active_base": "yolov8m-oiv7",
     "active_extensions": [
     ]
 }

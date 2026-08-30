@@ -15,14 +15,15 @@ build\dsl.exe
 启动日志示例：
 
 ```
-[Main] active base model: yolov8m (C:\...\dsl\models\base\yolov8m\model.onnx)
+[Main] active base model: yolov8m-oiv7 (C:\...\dsl\models\base\yolov8m-oiv7\model.onnx)
 [Main] photo dir: C:\...\tio\photo
+[Main] thresholds: base_conf=0.25 iou=0.45 fallback=0
 [Cache] Loaded 128 images from cache index.
 [Cache] Cache is up to date (128 images).
 ```
 
 - **首次运行**（无缓存索引）：对每张图执行 YOLO 推理（CPU 下约数分钟），
-  结果写入 `cache/yolov8m/cache_index.json`。
+  结果写入 `cache/yolov8m-oiv7/cache_index.json`。
 - **再次运行**：扫描图库并对比 `mtime`/`size`，**只对新增/修改的图片重新推理**，
   删除的图片自动剔除；无变化时直接加载索引（秒级，不加载模型）。
 - **缓存失效**：以下情况会触发重建：
@@ -35,7 +36,7 @@ build\dsl.exe
 ```json
 {
   "version": "1.1",
-  "model_name": "yolov8m",
+  "model_name": "yolov8m-oiv7",
   "next_obj_id": 225,
   "next_img_id": 128,
   "entries": {
@@ -43,9 +44,9 @@ build\dsl.exe
       "mtime": 1661439700,
       "size": 158392,
       "img_id": 6,
-      "objects": [ { "class": "human", "x": 0.32, "y": 0.64, "w": 0.22, "h": 0.27,
-                     "area": 0.062, "confidence": 0.361, "original_class": "person",
-                     "super_class": "human", "is_fallback": true, "parent_id": -1,
+      "objects": [ { "class": "person", "x": 0.32, "y": 0.64, "w": 0.22, "h": 0.27,
+                     "area": 0.062, "confidence": 0.361, "original_class": "",
+                     "super_class": "person", "is_fallback": false, "parent_id": -1,
                      "obj_id": 0, "img_id": 6 } ],
       "img_attrs": { "color_temperature": 5200, "avg_hue": 28.1, "avg_saturation": 0.41,
                      "avg_value": 0.62, "dominant_color": "orange",
@@ -71,7 +72,7 @@ build\dsl.exe
 models/
 ├── registry.json          # 切换开关
 └── base/
-    ├── yolov8m/           # 一个模型一个子目录
+    ├── yolov8m-oiv7/      # 一个模型一个子目录
     │   ├── model.onnx     # ONNX 模型（引擎只加载 .onnx）
     │   ├── meta.json      # { "name", "type", "input_size", "classes" }
     │   └── classes.json   # 输出类别 + 父类继承链
@@ -80,13 +81,13 @@ models/
 `meta.json` 示例：
 
 ```json
-{ "name": "yolov8m", "type": "detector", "input_size": 640, "classes": 80 }
+{ "name": "yolov8m-oiv7", "type": "detector", "input_size": 640, "classes": 601 }
 ```
 
 `registry.json` 示例：
 
 ```json
-{ "active_base": "yolov8m", "active_extensions": [] }
+{ "active_base": "yolov8m-oiv7", "active_extensions": [] }
 ```
 
 ### 切换模型（改配置后重启）
@@ -97,8 +98,8 @@ models/
 ### 命令行临时切换
 
 ```powershell
-build\dsl.exe --base yolov8m      # 本次运行使用 yolov8m
-build\dsl.exe --list-models       # 列出所有注册的基座模型
+build\dsl.exe --base yolov8m-oiv7   # 本次运行使用 yolov8m-oiv7
+build\dsl.exe --list-models         # 列出所有注册的基座模型
 ```
 
 `--base` 优先级高于 `registry.json`；指定不存在的模型会报错并列出可用项。
@@ -106,16 +107,20 @@ build\dsl.exe --list-models       # 列出所有注册的基座模型
 ### 添加新基座模型
 
 1. 用 `export_yolov8.py`（或官方 `yolo export`）把 `.pt` 转成 `.onnx`，放入 `models/base/<名字>/model.onnx`。
-2. 同目录创建 `meta.json`（`name` 与目录名一致）与 `classes.json`（见 `make_classes.py`）。
+2. 同目录创建 `meta.json`（`name` 与目录名一致）与 `classes.json`（见
+   [base_model_pack_format.md](base_model_pack_format.md) 的字段规则）。
 3. 编辑 `models/registry.json` 的 `active_base`，或启动时用 `--base <名字>`。
 
 ## 3. 继承映射与置信度降级
 
-`classes.json` 定义"子类 → 父类"（is-a）继承链，`config/config.json` 中的 `conf_threshold`
-（默认 0.45）决定降级阈值：
+`classes.json` 定义"子类 → 父类"（is-a）继承链。推理阈值统一放在
+`config/settings.ini` 的 `[inference]` 段（GUI 设置页「推理阈值」面板可调），
+其中 `fallback_threshold`（默认 0）控制置信度降级：
 
-- 检测置信度 **≥ 0.45**：保留原类别，仅记录 `super_class`，`is_fallback = false`。
-- 检测置信度 **< 0.45** 且该类别存在父类：类别改写成父类名，`original_class` 保留原始类别。
+- 检测置信度 **≥ base_conf_threshold**（默认 0.25）才会被记录；
+- **fallback_threshold = 0**：禁用降级。OIV7 模型本身就能直接输出 `fruit`、`food`、
+  `animal`、`vehicle` 等父类别，无需再按置信度把子类改写为父类；
+  若手动调高，则置信度低于该值的检测会降级为父类名（`original_class` 保留原类别）。
 
 `cnt(fruit)` 既统计类别名为 `fruit` 的对象，也统计 `apple`/`banana` 等子类：
 
@@ -172,9 +177,7 @@ models/extensions/<name>/
 `models/registry.json` 的 `active_extensions` 决定哪些包可被 `>>` 使用（未注册的包报错）：
 
 ```powershell
-python make_ext_model.py 3 models/extensions/demo_v1/model.pt
-python export_ext_onnx.py models/extensions/demo_v1/model.pt models/extensions/demo_v1/model.onnx 224
-# 手写 config.json，并把 "demo_v1" 加入 registry.json 的 active_extensions
+# 手写 models/extensions/<name>/config.json，并把 "<name>" 加入 registry.json 的 active_extensions
 ```
 
 ```dsl
@@ -220,7 +223,7 @@ GUI 位于 `tio/gui`（Qt 6）。构建后在 `gui/build/tio.exe` 双击运行�
 3. 双击结果打开**图片详情**对话框：查看元数据（曝光/清晰度/EXIF），编辑用户标记。
 4. 搜索栏 **🏷️ 标签筛选**：配置标签预筛选（见第 4 节）。
 5. 搜索栏 **🗑 删除选中**：多选删除图片（见第 5 节）。
-6. 右上角语言切换（EN/中文）、设置页（API/图库/模型/扩展/日志）、深浅主题切换。
+6. 右上角语言切换（EN/中文）、设置页（API/图库/模型/推理阈值/扩展/日志）、深浅主题切换。
 
 ## 9. 常见问题
 

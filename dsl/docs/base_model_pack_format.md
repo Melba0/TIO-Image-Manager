@@ -23,14 +23,14 @@ models/base/<name>/
 | `input_size` | int | 否 | 推理边长，默认 `640`（letterbox 后送入网络的尺寸） |
 | `classes` | int | 否 | 输出类别数，默认 `80` |
 
-示例（`models/base/yolov8m/meta.json`）：
+示例（`models/base/yolov8m-oiv7/meta.json`）：
 
 ```json
 {
-  "name": "yolov8m",
+  "name": "yolov8m-oiv7",
   "type": "detector",
   "input_size": 640,
-  "classes": 80
+  "classes": 601
 }
 ```
 
@@ -75,11 +75,13 @@ info.classes     = j.value("classes", 80);
 
 ### 生成工具
 
-`make_classes.py` 可一键生成 COCO-80 + 父类链：
+当前基座为 Open Images V7（`yolov8m-oiv7`，601 个输出类别）。类别名由检查点的
+`model.names` 直接导出，父类链来自 Open Images 官方层级（`bbox_labels_600_hierarchy.json`）；
+两者都转为小写以匹配 DSL 的类别约定（如 `cat`、`fruit`、`vehicle`）。父类如
+`fruit`、`food`、`animal`、`vehicle` 本身就是模型的输出类别，因此 `classes.json` 无需额外追加父类条目。
 
-```powershell
-python make_classes.py models/base/yolov8m/classes.json
-```
+`make_classes.py` 已随旧 COCO-80 模型一并移除；新增模型时用 `export_yolov8.py` 导出 ONNX
+后，按本文件的字段规则手工编写 `classes.json`（或用任意脚本从 `model.names` + OI 层级生成）。
 
 ---
 
@@ -117,13 +119,13 @@ uy2 = (y2 - pad_y) / scale
 `export_yolov8.py` 将 ultralytics YOLOv8 检查点转换为上述格式（无需安装 ultralytics）：
 
 ```powershell
-python export_yolov8.py yolov8m.pt models/base/yolov8m/model.onnx
+python export_yolov8.py yolov8m-oiv7.pt models/base/yolov8m-oiv7/model.onnx
 ```
 
 也可以使用官方 CLI：
 
 ```powershell
-yolo export model=yolov8m.pt format=onnx opset=12 imgsz=640
+yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
 ```
 
 导出后删除旧的 `model.pt`，把 ONNX 文件放到 `model.onnx`。
@@ -136,7 +138,7 @@ yolo export model=yolov8m.pt format=onnx opset=12 imgsz=640
 
 ```json
 {
-  "active_base": "yolov8m",
+  "active_base": "yolov8m-oiv7",
   "active_extensions": ["botany_v1", "person_parts_v1"]
 }
 ```

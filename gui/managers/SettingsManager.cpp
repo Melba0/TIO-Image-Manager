@@ -127,6 +127,33 @@ void SettingsManager::setTagFilters(const QStringList& filters) {
     settings_->sync();
 }
 
+double SettingsManager::fallbackThreshold() const {
+    return settings_->value("inference/fallback_threshold", 0.0).toDouble();
+}
+
+double SettingsManager::baseConfThreshold() const {
+    return settings_->value("inference/base_conf_threshold", 0.25).toDouble();
+}
+
+double SettingsManager::iouThreshold() const {
+    return settings_->value("inference/iou_threshold", 0.45).toDouble();
+}
+
+void SettingsManager::setFallbackThreshold(double v) {
+    settings_->setValue("inference/fallback_threshold", v);
+    settings_->sync();
+}
+
+void SettingsManager::setBaseConfThreshold(double v) {
+    settings_->setValue("inference/base_conf_threshold", v);
+    settings_->sync();
+}
+
+void SettingsManager::setIouThreshold(double v) {
+    settings_->setValue("inference/iou_threshold", v);
+    settings_->sync();
+}
+
 QVariant SettingsManager::value(const QString& key, const QVariant& def) const {
     return settings_->value(key, def);
 }

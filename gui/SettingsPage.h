@@ -8,6 +8,7 @@ class QPushButton;
 class QCheckBox;
 class QFormLayout;
 class QLineEdit;
+class QDoubleSpinBox;
 
 // Embedded settings page (no dialog): left vertical navigation + right panels
 // for 通用 / API / 图库 / 模型 / 扩展包 / 日志.
@@ -30,6 +31,7 @@ private:
     QWidget* buildApiPanel();
     QWidget* buildLibraryPanel();
     QWidget* buildModelsPanel();
+    QWidget* buildInferencePanel();
     QWidget* buildExtensionsPanel();
 
     // re-translatable widgets (text is re-applied in retranslateUi)
@@ -47,6 +49,12 @@ private:
     QLabel* modelsHint_ = nullptr;
     QPushButton* addModelBtn_ = nullptr;
     QPushButton* delModelBtn_ = nullptr;
+    QLabel* inferenceTitle_ = nullptr;
+    QFormLayout* inferenceForm_ = nullptr;
+    QDoubleSpinBox* baseConfSpin_ = nullptr;
+    QDoubleSpinBox* iouSpin_ = nullptr;
+    QDoubleSpinBox* fallbackSpin_ = nullptr;
+    QLabel* inferenceHint_ = nullptr;
     QLabel* extHint_ = nullptr;
     QPushButton* addExtBtn_ = nullptr;
     QPushButton* delExtBtn_ = nullptr;

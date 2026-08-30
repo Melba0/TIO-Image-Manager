@@ -10,6 +10,7 @@
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QComboBox>
+#include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -33,7 +34,7 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
     nav_ = new QListWidget(this);
     nav_->setObjectName("navList");
     nav_->setFixedWidth(160);
-    for (int i = 0; i < 6; ++i) nav_->addItem(QString::number(i));
+    for (int i = 0; i < 7; ++i) nav_->addItem(QString::number(i));
     nav_->setCurrentRow(0);
     lastNavRow_ = 0;
     root->addWidget(nav_);
@@ -43,8 +44,9 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
     stack_->addWidget(buildApiPanel());         // 1
     stack_->addWidget(buildLibraryPanel());     // 2
     stack_->addWidget(buildModelsPanel());      // 3
-    stack_->addWidget(buildExtensionsPanel());  // 4
-    stack_->addWidget(new LogPanel(this));      // 5
+    stack_->addWidget(buildInferencePanel());   // 4
+    stack_->addWidget(buildExtensionsPanel());  // 5
+    stack_->addWidget(new LogPanel(this));      // 6
     root->addWidget(stack_, 1);
 
     connect(nav_, &QListWidget::currentRowChanged, stack_, &QStackedWidget::setCurrentIndex);
@@ -80,7 +82,7 @@ void SettingsPage::showEvent(QShowEvent* e) {
 
 void SettingsPage::retranslateUi() {
     const QStringList items = {tr("General"), tr("API Config"), tr("Library"),
-                               tr("Models"), tr("Extensions"), tr("Logs")};
+                               tr("Models"), tr("Inference"), tr("Extensions"), tr("Logs")};
     for (int i = 0; i < items.size(); ++i) {
         QListWidgetItem* it = nav_->item(i);
         if (it) it->setText(items[i]);
@@ -106,6 +108,22 @@ void SettingsPage::retranslateUi() {
     if (modelsHint_) modelsHint_->setText(tr("Double-click an item to switch the active model (writes registry.json):"));
     if (addModelBtn_) addModelBtn_->setText(tr("Add Model"));
     if (delModelBtn_) delModelBtn_->setText(tr("Remove Model"));
+    if (inferenceTitle_) inferenceTitle_->setText(tr("Inference Thresholds"));
+    if (inferenceHint_) {
+        inferenceHint_->setText(tr("Changes take effect on the next search. Set Fallback to 0 to disable it "
+                                   "(the OIV7 model already predicts parent classes directly)."));
+    }
+    if (inferenceForm_) {
+        if (baseConfSpin_) {
+            if (auto* l = qobject_cast<QLabel*>(inferenceForm_->labelForField(baseConfSpin_))) l->setText(tr("Base Confidence:"));
+        }
+        if (iouSpin_) {
+            if (auto* l = qobject_cast<QLabel*>(inferenceForm_->labelForField(iouSpin_))) l->setText(tr("IoU (NMS):"));
+        }
+        if (fallbackSpin_) {
+            if (auto* l = qobject_cast<QLabel*>(inferenceForm_->labelForField(fallbackSpin_))) l->setText(tr("Fallback Threshold:"));
+        }
+    }
     if (extHint_) extHint_->setText(tr("Check to enable/disable an extension pack (writes registry.json):"));
     if (addExtBtn_) addExtBtn_->setText(tr("Add Extension"));
     if (delExtBtn_) delExtBtn_->setText(tr("Remove Extension"));
@@ -353,6 +371,69 @@ QWidget* SettingsPage::buildModelsPanel() {
         qInfo() << "删除模型包: " << name;
         emit settingsChanged();
     });
+    return w;
+}
+
+// ---------------- 推理阈值 ----------------
+QWidget* SettingsPage::buildInferencePanel() {
+    QWidget* w = new QWidget(this);
+    QVBoxLayout* lay = new QVBoxLayout(w);
+    QLabel* title = new QLabel(w);
+    title->setText(tr("Inference Thresholds"));
+    inferenceTitle_ = title;
+    QFont f = title->font();
+    f.setBold(true);
+    f.setPointSize(13);
+    title->setFont(f);
+    lay->addWidget(title);
+
+    QFormLayout* form = new QFormLayout();
+    inferenceForm_ = form;
+    form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+
+    SettingsManager* s = SettingsManager::instance();
+
+    QDoubleSpinBox* baseConf = new QDoubleSpinBox(w);
+    baseConf->setRange(0.0, 1.0);
+    baseConf->setSingleStep(0.05);
+    baseConf->setDecimals(2);
+    baseConf->setValue(s->baseConfThreshold());
+    baseConfSpin_ = baseConf;
+    connect(baseConf, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [](double v) {
+        SettingsManager::instance()->setBaseConfThreshold(v);
+    });
+    form->addRow(tr("Base Confidence:"), baseConf);
+
+    QDoubleSpinBox* iou = new QDoubleSpinBox(w);
+    iou->setRange(0.0, 1.0);
+    iou->setSingleStep(0.05);
+    iou->setDecimals(2);
+    iou->setValue(s->iouThreshold());
+    iouSpin_ = iou;
+    connect(iou, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [](double v) {
+        SettingsManager::instance()->setIouThreshold(v);
+    });
+    form->addRow(tr("IoU (NMS):"), iou);
+
+    QDoubleSpinBox* fallback = new QDoubleSpinBox(w);
+    fallback->setRange(0.0, 1.0);
+    fallback->setSingleStep(0.05);
+    fallback->setDecimals(2);
+    fallback->setValue(s->fallbackThreshold());
+    fallbackSpin_ = fallback;
+    connect(fallback, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [](double v) {
+        SettingsManager::instance()->setFallbackThreshold(v);
+    });
+    form->addRow(tr("Fallback Threshold:"), fallback);
+    lay->addLayout(form);
+
+    QLabel* hint = new QLabel(w);
+    hint->setWordWrap(true);
+    hint->setText(tr("Changes take effect on the next search. Set Fallback to 0 to disable it "
+                     "(the OIV7 model already predicts parent classes directly)."));
+    inferenceHint_ = hint;
+    lay->addWidget(hint);
+    lay->addStretch();
     return w;
 }
 

@@ -1,6 +1,7 @@
 # 图像检索 DSL 解释器（Image Retrieval DSL Interpreter）
 
-基于 C++17 的图片检索 DSL 解释器，内置 YOLOv8m 目标检测（ONNX Runtime / CPU）与智能增量缓存。
+基于 C++17 的图片检索 DSL 解释器，内置 YOLOv8m（Open Images V7，601 类）目标检测
+（ONNX Runtime / CPU）与智能增量缓存。
 用户通过类自然语言的查询语句（例如 `$ : (any(class == "cat"))`）从图库中检索图片、提取对象、
 执行继承查询与扩展包细化。
 
@@ -21,7 +22,10 @@
   每次启动按文件修改时间/大小对比图库，**只对新增/修改的图片重新推理**，删除的图片自动剔除；
   无变化时直接加载索引（秒级启动）。旧版 `metadata.json` 自动迁移。
 - **模型注册表（Model Registry）**：通过 `models/registry.json` 动态切换基座 YOLO 模型，无需重新编译。
-- **置信度降级**：低置信度检测框按 `classes.json` 中的继承关系自动归入父类（如 `apple -> fruit`）。
+- **继承查询（is-a）**：`classes.json` 定义完整继承链，`cnt(fruit)` 同时统计 `fruit` 及其子类
+  （`apple`/`banana`…）；OIV7 模型的父类（`fruit`/`food`/`animal`/`vehicle`…）本身就是输出类别。
+- **推理阈值可调**：`base_conf_threshold` / `iou_threshold` / `fallback_threshold` 存于
+  `config/settings.ini` 的 `[inference]` 段，GUI 设置页「推理阈值」面板可调，引擎启动时读取。
 - **扩展包（Extension Pack）**：对检测到的对象进行区域裁剪并运行专用 ONNX 模型（检测器/分类器），
   实现"细粒度"二次分析（如 `person` → 身体部位）。
 - **ONNX Runtime 推理后端**：基座模型与扩展模型统一由 `InferenceBackend` 抽象接口驱动（当前实现
@@ -46,14 +50,14 @@ tio/
     │   └── utils/                # filesystem_utils / exif_reader
     ├── models/
     │   ├── registry.json         # 切换开关（active_base / active_extensions）
-    │   ├── base/yolov8m/         # {model.onnx, meta.json, classes.json}
+    │   ├── base/yolov8m-oiv7/    # {model.onnx, meta.json, classes.json}
     │   └── extensions/           # 扩展包（可选，见 extension_pack_format.md）
     ├── config/
-    │   ├── config.json           # 置信度阈值
-    │   └── settings.ini          # GUI 设置（语言 / LLM / 图库 / 标签筛选）
+    │   ├── settings.ini          # GUI 设置 + [inference] 推理阈值
+    │   └── config.json           # 兼容旧阈值配置（settings.ini 缺失时兜底）
     ├── cache/                    # 运行时自动生成（按模型分子目录）
     ├── docs/                     # 本文档
-    └── export_*.py / make_*.py   # Python 模型与配置生成工具
+    └── export_yolov8.py          # .pt -> .onnx 导出工具
 ```
 
 ## 环境依赖
@@ -87,15 +91,11 @@ cmake --build build
 
 ```powershell
 # 基座 YOLO（输出 (1, 4+nc, N)，框为 letterbox 后输入像素坐标）
-python export_yolov8.py yolov8m.pt models/base/yolov8m/model.onnx
-# 或官方 CLI：yolo export model=yolov8m.pt format=onnx opset=12 imgsz=640
-
-# 扩展分类器/检测器
-python make_ext_model.py 3 models/extensions/demo_v1/model.pt
-python export_ext_onnx.py models/extensions/demo_v1/model.pt models/extensions/demo_v1/model.onnx 224
+python export_yolov8.py yolov8m-oiv7.pt models/base/yolov8m-oiv7/model.onnx
+# 或官方 CLI：yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
 ```
 
-导出后把 ONNX 文件放到对应 `model.onnx`，把扩展包 `config.json` 的 `model_path` 改为指向 `.onnx`。
+导出后把 ONNX 文件放到对应 `model.onnx`，并维护好 `meta.json` 与 `classes.json`。
 详见 [python_tools.md](python_tools.md)。
 
 ## 快速开始
@@ -111,7 +111,7 @@ build\dsl.exe query.dsl
 build\dsl.exe --list-models
 
 # 临时切换基座模型（优先于配置文件）
-build\dsl.exe --base yolov8m
+build\dsl.exe --base yolov8m-oiv7
 
 # --json 模式（GUI 使用）：DSL 从 stdin 读入，结果以 JSON 输出
 build\dsl.exe --json --photo .\photo < query.dsl

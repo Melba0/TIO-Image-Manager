@@ -90,14 +90,9 @@ logits = model(crop)   # (1, nc)
 
 ### 生成工具
 
-`make_ext_model.py` 生成一个合成分类器扩展模型，再用 `export_ext_onnx.py` 转成 `.onnx`：
-
-```powershell
-python make_ext_model.py 3 models/extensions/demo_v1/model.pt
-python export_ext_onnx.py models/extensions/demo_v1/model.pt models/extensions/demo_v1/model.onnx 224
-```
-
-导出后把 `config.json` 的 `model_path` 改为 `extensions/demo_v1/model.onnx`，可删除 `.pt`。
+扩展包模型需自行训练或转换；`make_ext_model.py`/`export_ext_onnx.py` 已随旧基座模型移除。
+可参考 `export_yolov8.py` 的思路，或用官方 `yolo export` 把自定义 `.pt` 转成 `.onnx`，
+再把 `config.json` 的 `model_path` 指向 `extensions/<name>/model.onnx`，可删除 `.pt`。
 
 ---
 
@@ -107,7 +102,7 @@ python export_ext_onnx.py models/extensions/demo_v1/model.pt models/extensions/d
 
 ```json
 {
-  "active_base": "yolov8m",
+  "active_base": "yolov8m-oiv7",
   "active_extensions": ["botany_v1", "person_parts_v1"]
 }
 ```
