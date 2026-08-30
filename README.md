@@ -25,11 +25,11 @@ A desktop image-retrieval tool made of two parts:
 |------|---------|
 | 自然语言检索（GUI + LLM 翻译） | Natural-language search: describe an image and the GUI translates it to DSL via an LLM |
 | 手写递归下降 DSL 解析器 | Hand-written recursive-descent parser (no generator), UTF-8 identifiers support 中文类名 |
-| YOLOv8m 目标检测（ONNX Runtime, CPU） | YOLOv8m object detection through ONNX Runtime (CPU-only, no GPU/LibTorch) |
+| YOLOv8m（Open Images V7，601 类）检测（ONNX Runtime, CPU） | YOLOv8m-OIV7 object detection (601 classes, incl. `fruit`/`food`/`animal` parents) through ONNX Runtime (CPU-only) |
 | 新式筛选语法 `$ : (条件)` | Modern filter syntax `$ : (condition)` plus `any(...)` / `all(...)` object-level conditions |
 | 集合与上溯：`%` / `^` / `\| & -` | Object extraction `%`, image lift `^`, set union/intersection/difference |
 | 继承计数 `cnt(fruit)` | Inheritance-aware counting: `cnt(fruit)` also counts `apple`/`banana` subclasses |
-| 置信度降级 | Confidence fallback: low-confidence detections are folded into their parent class |
+| 可调推理阈值 | Configurable inference thresholds (base-conf / IoU / fallback) in the GUI settings page |
 | 增量缓存 | Incremental cache (`cache/<model>/cache_index.json`): only re-infers added/modified files |
 | 图像属性：曝光 / 清晰度 / EXIF / 用户标记 | Image attrs: exposure, blur, lightweight built-in EXIF reader, editable user tags |
 | 直方图宏 | 32-bin hue histograms: `obj_hist` / `img_hist` / `hist_sim` / `hist_value` |
@@ -54,7 +54,7 @@ want — *“a cat to the left of a dog”* — and the engine ranks images by a
                                                                     │
                                     ┌───────────────────────────────┤
                                     ▼                               ▼
-                    cache/<model>/cache_index.json     models/base/yolov8m/model.onnx
+                    cache/<model>/cache_index.json     models/base/yolov8m-oiv7/model.onnx
                     (增量缓存 / incremental cache)      + models/registry.json
 ```
 
@@ -83,11 +83,11 @@ tio/
 │   │   └── utils/          # filesystem_utils / exif_reader
 │   ├── models/
 │   │   ├── registry.json   # active_base / active_extensions
-│   │   └── base/yolov8m/   # {model.onnx, meta.json, classes.json}
+│   │   └── base/yolov8m-oiv7/   # {model.onnx, meta.json, classes.json}
 │   ├── cache/              # 运行时生成 / generated at runtime
-│   ├── config/             # config.json（阈值）+ settings.ini（GUI 设置，勿提交）
+│   ├── config/             # settings.ini（GUI 设置 + 推理阈值）+ config.json（兼容）
 │   ├── docs/               # 中文文档 / Chinese docs
-│   └── export_*.py ...     # 模型导出 / Python model-export tools
+│   └── export_yolov8.py    # 模型导出 / Python model-export tool
 └── gui/                    # Qt 6 桌面端 / the Qt GUI
     └── build/              # 产物 tio.exe + 伴生 dsl.exe（POST_BUILD 自动部署）
 ```
@@ -142,8 +142,8 @@ The engine only loads `.onnx` models. Export a YOLOv8 checkpoint with the bundle
 (or the official `yolo export` CLI):
 
 ```powershell
-python export_yolov8.py yolov8m.pt models/base/yolov8m/model.onnx
-# 等价 / equivalent:  yolo export model=yolov8m.pt format=onnx opset=12 imgsz=640
+python export_yolov8.py yolov8m-oiv7.pt models/base/yolov8m-oiv7/model.onnx
+# 等价 / equivalent:  yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
 ```
 
 A registered base model needs `model.onnx` + `meta.json` + `classes.json` under
@@ -159,7 +159,7 @@ A registered base model needs `model.onnx` + `meta.json` + `classes.json` under
 ```powershell
 build\dsl.exe                      # 交互式 REPL / interactive REPL
 build\dsl.exe --list-models        # 查看注册的模型 / list registered models
-build\dsl.exe --base yolov8m       # 临时切换基座模型 / override the active base
+build\dsl.exe --base yolov8m-oiv7  # 临时切换基座模型 / override the active base
 build\dsl.exe --json --photo .\photo --tag-filter "city=sh" < query.dsl
 ```
 

@@ -132,8 +132,12 @@ $ : (any flower)
 
 ```dsl
 $ : (cnt(fruit) > 2)      # 水果超过 2 个的图片
-cnt(human)                # 图库中所有 human（含 person 子类）的总数
+cnt(person)               # 图库中所有 person 类对象总数
+cnt(animal)               # animal 及其全部子类（cat/dog/…）的总数
 ```
+
+> 类别名与 `classes.json` 完全一致（小写；多词类别使用下划线，如 `traffic_light`、
+> `stop_sign`）。父类别（`fruit`/`food`/`animal`/`vehicle`…）本身就是模型可输出的类别。
 
 ## 5. 变量与 `out`
 

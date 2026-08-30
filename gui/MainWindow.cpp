@@ -137,6 +137,7 @@ MainWindow::MainWindow(QWidget* parent)
     refreshStats();
     refreshStatusBar();
     qInfo() << "Application started";
+    QTimer::singleShot(200, this, &MainWindow::startWarmup);
 }
 
 MainWindow::~MainWindow() {
@@ -392,6 +393,9 @@ void MainWindow::refreshStatusBar() {
 }
 
 QString MainWindow::buildClassesSummary() const {
+    // Feed the LLM the ACTIVE model's classes.json verbatim so it generates
+    // DSL with the exact class names (including underscore names like
+    // "traffic_light" and parent classes like "fruit"/"vehicle").
     QString proj = SettingsManager::projectDir();
     QString active;
     {
@@ -403,23 +407,7 @@ QString MainWindow::buildClassesSummary() const {
     if (active.isEmpty()) return QString();
     QFile f(proj + "/models/base/" + active + "/classes.json");
     if (!f.open(QIODevice::ReadOnly)) return QString();
-    QJsonArray classes = QJsonDocument::fromJson(f.readAll()).object()["classes"].toArray();
-    QHash<QString, QStringList> byParent;
-    for (const QJsonValue& v : classes) {
-        QJsonObject c = v.toObject();
-        QString parent = c["parent"].toString();
-        if (parent.isEmpty()) parent = "root";
-        byParent[parent].append(c["name"].toString());
-    }
-    QStringList lines;
-    QStringList keys = byParent.keys();
-    keys.sort();
-    for (const QString& p : keys) {
-        QStringList kids = byParent.value(p);
-        kids.sort();
-        lines << p + " -> [" + kids.join(", ") + "]";
-    }
-    return lines.join("\n");
+    return QString::fromUtf8(f.readAll());
 }
 
 QString MainWindow::buildExtensionsSummary() const {
@@ -443,6 +431,23 @@ QStringList MainWindow::engineArgs() const {
         args << "--tag-filter" << (f.first + "=" + f.second.join('|'));
     }
     return args;
+}
+
+// Build/refresh the inference cache in the background right after startup so
+// the first real query does not pay the full preprocessing cost.  Progress
+// messages stream to the log panel via onEngineStdErr.
+void MainWindow::startWarmup() {
+    if (engine_->state() != QProcess::NotRunning) return;
+    if (!QFile::exists(SettingsManager::instance()->enginePath())) return;
+    warmupRunning_ = true;
+    engineErrBuf_.clear();
+    engine_->start(SettingsManager::instance()->enginePath(), engineArgs() << "--warmup");
+    if (engine_->waitForStarted(5000)) {
+        engine_->closeWriteChannel();
+        qInfo() << "[Preprocess] engine --warmup started";
+    } else {
+        warmupRunning_ = false;
+    }
 }
 
 void MainWindow::onTranslateClicked() {
@@ -502,8 +507,17 @@ void MainWindow::onExecuteClicked() {
         return;
     }
     if (engine_->state() != QProcess::NotRunning) {
-        statusBar()->showMessage(tr("Engine is already running"));
-        return;
+        // A startup warmup may still be building the cache; abort it and run
+        // the user's query right away (the warmup was only a convenience).
+        if (warmupRunning_) {
+            qInfo() << "[Preprocess] aborting warmup to serve the query";
+            engine_->kill();
+            engine_->waitForFinished(3000);
+            warmupRunning_ = false;
+        } else {
+            statusBar()->showMessage(tr("Engine is already running"));
+            return;
+        }
     }
 
     resultGrid_->clear();
@@ -532,14 +546,28 @@ void MainWindow::onEngineFinished(int, QProcess::ExitStatus) {
     spinner_->stop();
     execBtn_->setEnabled(true);
 
-    ++runs_;
-    bool rebuilt = engineErrBuf_.contains("[Cache] Building cache");
-    if (!rebuilt) ++cacheHits_;
-    qInfo() << (rebuilt ? "Engine finished (cache rebuilt)" : "Engine finished (cache hit)");
-
     QByteArray out = engine_->readAllStandardOutput();
     QJsonParseError perr;
     QJsonDocument doc = QJsonDocument::fromJson(out, &perr);
+
+    // Warmup run: the cache was (re)built in the background; no results to show.
+    if (warmupRunning_) {
+        warmupRunning_ = false;
+        bool rebuilt = engineErrBuf_.contains("[Cache] No cache index found")
+                    || engineErrBuf_.contains("[Cache] Incremental update");
+        if (rebuilt) qInfo() << "[Preprocess] inference cache built/updated";
+        else        qInfo() << "[Preprocess] cache already up to date";
+        refreshStats();
+        refreshStatusBar();
+        return;
+    }
+
+    ++runs_;
+    bool rebuilt = engineErrBuf_.contains("[Cache] No cache index found")
+                || engineErrBuf_.contains("[Cache] Incremental update");
+    if (!rebuilt) ++cacheHits_;
+    qInfo() << (rebuilt ? "Engine finished (cache rebuilt)" : "Engine finished (cache hit)");
+
     if (perr.error != QJsonParseError::NoError || !doc.isObject()) {
         statusBar()->showMessage(tr("Engine output is not valid JSON"));
         return;
@@ -548,7 +576,14 @@ void MainWindow::onEngineFinished(int, QProcess::ExitStatus) {
 }
 
 void MainWindow::onEngineStdErr() {
-    engineErrBuf_ += engine_->readAllStandardError();
+    QByteArray chunk = engine_->readAllStandardError();
+    engineErrBuf_ += chunk;
+    // Forward engine lines to the log panel (they include the [Cache]
+    // preprocessing progress) so the user sees what is being processed.
+    for (const QByteArray& line : chunk.split('\n')) {
+        QString s = QString::fromUtf8(line).trimmed();
+        if (!s.isEmpty()) qInfo().noquote() << s;
+    }
 }
 
 void MainWindow::showResults(const QJsonObject& obj) {

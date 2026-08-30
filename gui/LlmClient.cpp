@@ -91,14 +91,19 @@ Convert the user's natural language query into a valid DSL code string.
 - Output ONLY the DSL code. NO explanations, NO markdown, NO backticks.
 - Output language: ENGLISH keywords and class names only (e.g., "dog", "cat", "fruit").
 
-## Available Classes (Dynamic)
-The current base model supports these classes and their parent-child relationships (parent -> children):
+## Available Classes (from the active model's classes.json)
+Below is the **exact `classes.json`** of the current base model (Open Images V7, 601 classes).
+It lists every valid class name and its parent (is-a) relationship:
+
+- `name` is the class you use in DSL. **Use the name exactly as written** (lowercase, and
+  multi-word classes use underscores, e.g. `traffic_light`, `stop_sign`, `mobile_phone`).
+- `parent` tells you the is-a parent of a class. Parent classes such as `fruit`, `food`,
+  `animal`, `vehicle` are themselves valid classes — the model can detect them directly.
+
 {CLASS_HIERARCHY}
 
-Example:
-fruit -> [apple, banana, orange]
-animal -> [cat, dog, bird]
-flower -> [rose, tulip]
+Use `cnt(parent)` / `any(parent)` to match a parent class AND all of its children
+(e.g. `cnt(fruit)` counts apples, bananas, oranges, ...).
 
 ## Available Extension Packs (for >> operator)
 {EXTENSION_LIST}
@@ -212,7 +217,7 @@ You can call these directly as functions.
 ## Examples
 
 **User:** Find images with exactly two people.
-**DSL:** `out = $ : (cnt(people) == 2)`
+**DSL:** `out = $ : (cnt(person) == 2)`
 
 **User:** Find images with a cat and a dog, and the cat is on the left of the dog.
 **DSL:** `out = $ : (any(class == "cat") && any(class == "dog") && left_of(cat, dog))`
@@ -231,17 +236,18 @@ out = ^(flowers : (any(warm && big)))
 **User:** Find images with bright objects that are larger than 20% of the screen.
 **DSL:** `out = $ : (any(bright && big))`
 
-**User:** Find a red car and a blue sky.
-**DSL:** `out = $ : (any(class == "car" && color(car, "red")) && any(class == "sky" && color(sky, "blue")))`
+**User:** Find a red car and a green tree.
+**DSL:** `out = $ : (any(class == "car" && color(car, "red")) && any(class == "tree" && color(tree, "green")))`
 
 **User:** Find warm-toned images with more than 2 people.
-**DSL:** `out = $ : (img_warmth() > 0.7 && cnt(people) > 2)`
+**DSL:** `out = $ : (img_warmth() > 0.7 && cnt(person) > 2)`
 
 **User:** Find images that are overall bluish.
 **DSL:** `out = $ : (img_color("blue") > 0.6)`
 
 ## CRITICAL CONSTRAINTS
-1. Use **ENGLISH** class names exactly as provided in `{CLASS_HIERARCHY}`.
+1. Use **exact** class names from the `classes.json` above (lowercase, underscores for
+   multi-word classes). Never invent, translate, or add spaces to class names.
 2. **DO NOT** write hardcoded pixel values. Use normalized ratios (0~1) for coordinates and areas.
 3. **DO NOT** output anything other than the DSL code. No introductions, no apologies.
 4. When users mention parent classes (e.g., "fruit"), use `cnt(fruit)` or `any(fruit)` to automatically match all children.

@@ -2,11 +2,11 @@
   "classes": [
     {
       "name": "accordion",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "adhesive tape",
-      "parent": "office supplies"
+      "name": "adhesive_tape",
+      "parent": "office_supplies"
     },
     {
       "name": "aircraft",
@@ -17,7 +17,7 @@
       "parent": "aircraft"
     },
     {
-      "name": "alarm clock",
+      "name": "alarm_clock",
       "parent": "clock"
     },
     {
@@ -26,7 +26,7 @@
     },
     {
       "name": "ambulance",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "animal",
@@ -53,7 +53,7 @@
       "parent": "vegetable"
     },
     {
-      "name": "auto part",
+      "name": "auto_part",
       "parent": "root"
     },
     {
@@ -62,23 +62,23 @@
     },
     {
       "name": "backpack",
-      "parent": "luggage and bags"
+      "parent": "luggage_and_bags"
     },
     {
       "name": "bagel",
-      "parent": "baked goods"
+      "parent": "baked_goods"
     },
     {
-      "name": "baked goods",
+      "name": "baked_goods",
       "parent": "food"
     },
     {
-      "name": "balance beam",
-      "parent": "sports equipment"
+      "name": "balance_beam",
+      "parent": "sports_equipment"
     },
     {
       "name": "ball",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "balloon",
@@ -89,12 +89,12 @@
       "parent": "fruit"
     },
     {
-      "name": "band-aid",
-      "parent": "medical equipment"
+      "name": "band_aid",
+      "parent": "medical_equipment"
     },
     {
       "name": "banjo",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "barge",
@@ -105,28 +105,28 @@
       "parent": "container"
     },
     {
-      "name": "baseball bat",
-      "parent": "sports equipment"
+      "name": "baseball_bat",
+      "parent": "sports_equipment"
     },
     {
-      "name": "baseball glove",
+      "name": "baseball_glove",
       "parent": "glove"
     },
     {
-      "name": "bat (animal)",
+      "name": "bat_animal",
       "parent": "root"
     },
     {
-      "name": "bathroom accessory",
+      "name": "bathroom_accessory",
       "parent": "root"
     },
     {
-      "name": "bathroom cabinet",
+      "name": "bathroom_cabinet",
       "parent": "furniture"
     },
     {
       "name": "bathtub",
-      "parent": "plumbing fixture"
+      "parent": "plumbing_fixture"
     },
     {
       "name": "beaker",
@@ -157,12 +157,12 @@
       "parent": "insect"
     },
     {
-      "name": "bell pepper",
+      "name": "bell_pepper",
       "parent": "vegetable"
     },
     {
       "name": "belt",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "bench",
@@ -170,27 +170,27 @@
     },
     {
       "name": "bicycle",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
-      "name": "bicycle helmet",
+      "name": "bicycle_helmet",
       "parent": "helmet"
     },
     {
-      "name": "bicycle wheel",
+      "name": "bicycle_wheel",
       "parent": "root"
     },
     {
       "name": "bidet",
-      "parent": "plumbing fixture"
+      "parent": "plumbing_fixture"
     },
     {
       "name": "billboard",
       "parent": "root"
     },
     {
-      "name": "billiard table",
-      "parent": "sports equipment"
+      "name": "billiard_table",
+      "parent": "sports_equipment"
     },
     {
       "name": "binoculars",
@@ -202,10 +202,10 @@
     },
     {
       "name": "blender",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
-      "name": "blue jay",
+      "name": "blue_jay",
       "parent": "bird"
     },
     {
@@ -233,24 +233,24 @@
       "parent": "tableware"
     },
     {
-      "name": "bottle opener",
-      "parent": "kitchen utensil"
+      "name": "bottle_opener",
+      "parent": "kitchen_utensil"
     },
     {
-      "name": "bow and arrow",
-      "parent": "sports equipment"
+      "name": "bow_and_arrow",
+      "parent": "sports_equipment"
     },
     {
       "name": "bowl",
       "parent": "tableware"
     },
     {
-      "name": "bowling equipment",
-      "parent": "sports equipment"
+      "name": "bowling_equipment",
+      "parent": "sports_equipment"
     },
     {
       "name": "box",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "boy",
@@ -262,22 +262,22 @@
     },
     {
       "name": "bread",
-      "parent": "baked goods"
+      "parent": "baked_goods"
     },
     {
       "name": "briefcase",
-      "parent": "luggage and bags"
+      "parent": "luggage_and_bags"
     },
     {
       "name": "broccoli",
       "parent": "vegetable"
     },
     {
-      "name": "bronze sculpture",
+      "name": "bronze_sculpture",
       "parent": "sculpture"
     },
     {
-      "name": "brown bear",
+      "name": "brown_bear",
       "parent": "bear"
     },
     {
@@ -294,7 +294,7 @@
     },
     {
       "name": "bus",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "bust",
@@ -302,7 +302,7 @@
     },
     {
       "name": "butterfly",
-      "parent": "moths and butterflies"
+      "parent": "moths_and_butterflies"
     },
     {
       "name": "cabbage",
@@ -317,12 +317,12 @@
       "parent": "dessert"
     },
     {
-      "name": "cake stand",
+      "name": "cake_stand",
       "parent": "tableware"
     },
     {
       "name": "calculator",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "camel",
@@ -333,8 +333,8 @@
       "parent": "tool"
     },
     {
-      "name": "can opener",
-      "parent": "kitchen utensil"
+      "name": "can_opener",
+      "parent": "kitchen_utensil"
     },
     {
       "name": "canary",
@@ -362,7 +362,7 @@
     },
     {
       "name": "car",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "carnivore",
@@ -374,10 +374,10 @@
     },
     {
       "name": "cart",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
-      "name": "cassette deck",
+      "name": "cassette_deck",
       "parent": "root"
     },
     {
@@ -389,24 +389,24 @@
       "parent": "carnivore"
     },
     {
-      "name": "cat furniture",
+      "name": "cat_furniture",
       "parent": "root"
     },
     {
       "name": "caterpillar",
-      "parent": "moths and butterflies"
+      "parent": "moths_and_butterflies"
     },
     {
       "name": "cattle",
       "parent": "mammal"
     },
     {
-      "name": "ceiling fan",
-      "parent": "home appliance"
+      "name": "ceiling_fan",
+      "parent": "home_appliance"
     },
     {
       "name": "cello",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "centipede",
@@ -422,14 +422,14 @@
     },
     {
       "name": "cheese",
-      "parent": "dairy product"
+      "parent": "dairy_product"
     },
     {
       "name": "cheetah",
       "parent": "carnivore"
     },
     {
-      "name": "chest of drawers",
+      "name": "chest_of_drawers",
       "parent": "furniture"
     },
     {
@@ -438,7 +438,7 @@
     },
     {
       "name": "chime",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "chisel",
@@ -446,10 +446,10 @@
     },
     {
       "name": "chopsticks",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
-      "name": "christmas tree",
+      "name": "christmas_tree",
       "parent": "tree"
     },
     {
@@ -473,7 +473,7 @@
       "parent": "drink"
     },
     {
-      "name": "cocktail shaker",
+      "name": "cocktail_shaker",
       "parent": "tableware"
     },
     {
@@ -485,39 +485,39 @@
       "parent": "drink"
     },
     {
-      "name": "coffee cup",
+      "name": "coffee_cup",
       "parent": "tableware"
     },
     {
-      "name": "coffee table",
+      "name": "coffee_table",
       "parent": "table"
     },
     {
       "name": "coffeemaker",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
       "name": "coin",
       "parent": "root"
     },
     {
-      "name": "common fig",
+      "name": "common_fig",
       "parent": "fruit"
     },
     {
-      "name": "common sunflower",
+      "name": "common_sunflower",
       "parent": "root"
     },
     {
-      "name": "computer keyboard",
+      "name": "computer_keyboard",
       "parent": "root"
     },
     {
-      "name": "computer monitor",
+      "name": "computer_monitor",
       "parent": "root"
     },
     {
-      "name": "computer mouse",
+      "name": "computer_mouse",
       "parent": "root"
     },
     {
@@ -525,7 +525,7 @@
       "parent": "tool"
     },
     {
-      "name": "convenience store",
+      "name": "convenience_store",
       "parent": "building"
     },
     {
@@ -533,11 +533,11 @@
       "parent": "snack"
     },
     {
-      "name": "cooking spray",
+      "name": "cooking_spray",
       "parent": "food"
     },
     {
-      "name": "corded phone",
+      "name": "corded_phone",
       "parent": "telephone"
     },
     {
@@ -553,7 +553,7 @@
       "parent": "root"
     },
     {
-      "name": "cowboy hat",
+      "name": "cowboy_hat",
       "parent": "hat"
     },
     {
@@ -562,10 +562,10 @@
     },
     {
       "name": "cream",
-      "parent": "personal care"
+      "parent": "personal_care"
     },
     {
-      "name": "cricket ball",
+      "name": "cricket_ball",
       "parent": "ball"
     },
     {
@@ -578,11 +578,11 @@
     },
     {
       "name": "crown",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "crutch",
-      "parent": "personal care"
+      "parent": "personal_care"
     },
     {
       "name": "cucumber",
@@ -597,15 +597,15 @@
       "parent": "root"
     },
     {
-      "name": "cutting board",
-      "parent": "kitchen utensil"
+      "name": "cutting_board",
+      "parent": "kitchen_utensil"
     },
     {
       "name": "dagger",
       "parent": "weapon"
     },
     {
-      "name": "dairy product",
+      "name": "dairy_product",
       "parent": "root"
     },
     {
@@ -622,14 +622,14 @@
     },
     {
       "name": "diaper",
-      "parent": "personal care"
+      "parent": "personal_care"
     },
     {
       "name": "dice",
       "parent": "toy"
     },
     {
-      "name": "digital clock",
+      "name": "digital_clock",
       "parent": "clock"
     },
     {
@@ -638,14 +638,14 @@
     },
     {
       "name": "dishwasher",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
       "name": "dog",
       "parent": "carnivore"
     },
     {
-      "name": "dog bed",
+      "name": "dog_bed",
       "parent": "root"
     },
     {
@@ -654,14 +654,14 @@
     },
     {
       "name": "dolphin",
-      "parent": "marine mammal"
+      "parent": "marine_mammal"
     },
     {
       "name": "door",
       "parent": "root"
     },
     {
-      "name": "door handle",
+      "name": "door_handle",
       "parent": "root"
     },
     {
@@ -681,7 +681,7 @@
       "parent": "clothing"
     },
     {
-      "name": "drill (tool)",
+      "name": "drill_tool",
       "parent": "root"
     },
     {
@@ -689,12 +689,12 @@
       "parent": "root"
     },
     {
-      "name": "drinking straw",
-      "parent": "kitchen utensil"
+      "name": "drinking_straw",
+      "parent": "kitchen_utensil"
     },
     {
       "name": "drum",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "duck",
@@ -702,7 +702,7 @@
     },
     {
       "name": "dumbbell",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "eagle",
@@ -710,10 +710,10 @@
     },
     {
       "name": "earrings",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
-      "name": "egg (food)",
+      "name": "egg_food",
       "parent": "root"
     },
     {
@@ -722,46 +722,46 @@
     },
     {
       "name": "envelope",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "eraser",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
-      "name": "face powder",
+      "name": "face_powder",
       "parent": "cosmetics"
     },
     {
-      "name": "facial tissue holder",
-      "parent": "bathroom accessory"
+      "name": "facial_tissue_holder",
+      "parent": "bathroom_accessory"
     },
     {
       "name": "falcon",
       "parent": "bird"
     },
     {
-      "name": "fashion accessory",
+      "name": "fashion_accessory",
       "parent": "clothing"
     },
     {
-      "name": "fast food",
+      "name": "fast_food",
       "parent": "food"
     },
     {
       "name": "fax",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "fedora",
       "parent": "hat"
     },
     {
-      "name": "filing cabinet",
+      "name": "filing_cabinet",
       "parent": "furniture"
     },
     {
-      "name": "fire hydrant",
+      "name": "fire_hydrant",
       "parent": "root"
     },
     {
@@ -790,10 +790,10 @@
     },
     {
       "name": "flute",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "flying disc",
+      "name": "flying_disc",
       "parent": "toy"
     },
     {
@@ -801,15 +801,15 @@
       "parent": "root"
     },
     {
-      "name": "food processor",
-      "parent": "kitchen appliance"
+      "name": "food_processor",
+      "parent": "kitchen_appliance"
     },
     {
       "name": "football",
       "parent": "ball"
     },
     {
-      "name": "football helmet",
+      "name": "football_helmet",
       "parent": "helmet"
     },
     {
@@ -818,7 +818,7 @@
     },
     {
       "name": "fork",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
       "name": "fountain",
@@ -829,11 +829,11 @@
       "parent": "carnivore"
     },
     {
-      "name": "french fries",
-      "parent": "fast food"
+      "name": "french_fries",
+      "parent": "fast_food"
     },
     {
-      "name": "french horn",
+      "name": "french_horn",
       "parent": "root"
     },
     {
@@ -845,7 +845,7 @@
       "parent": "food"
     },
     {
-      "name": "frying pan",
+      "name": "frying_pan",
       "parent": "kitchenware"
     },
     {
@@ -853,12 +853,12 @@
       "parent": "root"
     },
     {
-      "name": "garden asparagus",
+      "name": "garden_asparagus",
       "parent": "root"
     },
     {
-      "name": "gas stove",
-      "parent": "home appliance"
+      "name": "gas_stove",
+      "parent": "home_appliance"
     },
     {
       "name": "giraffe",
@@ -870,11 +870,11 @@
     },
     {
       "name": "glasses",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "glove",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "goat",
@@ -882,19 +882,19 @@
     },
     {
       "name": "goggles",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "goldfish",
       "parent": "fish"
     },
     {
-      "name": "golf ball",
-      "parent": "sports equipment"
+      "name": "golf_ball",
+      "parent": "sports_equipment"
     },
     {
-      "name": "golf cart",
-      "parent": "land vehicle"
+      "name": "golf_cart",
+      "parent": "land_vehicle"
     },
     {
       "name": "gondola",
@@ -922,14 +922,14 @@
     },
     {
       "name": "guitar",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "hair dryer",
-      "parent": "home appliance"
+      "name": "hair_dryer",
+      "parent": "home_appliance"
     },
     {
-      "name": "hair spray",
+      "name": "hair_spray",
       "parent": "cosmetics"
     },
     {
@@ -945,32 +945,32 @@
       "parent": "mammal"
     },
     {
-      "name": "hand dryer",
-      "parent": "home appliance"
+      "name": "hand_dryer",
+      "parent": "home_appliance"
     },
     {
       "name": "handbag",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "handgun",
       "parent": "weapon"
     },
     {
-      "name": "harbor seal",
-      "parent": "marine mammal"
+      "name": "harbor_seal",
+      "parent": "marine_mammal"
     },
     {
       "name": "harmonica",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "harp",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "harpsichord",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "hat",
@@ -982,7 +982,7 @@
     },
     {
       "name": "heater",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
       "name": "hedgehog",
@@ -997,19 +997,19 @@
       "parent": "clothing"
     },
     {
-      "name": "high heels",
+      "name": "high_heels",
       "parent": "footwear"
     },
     {
-      "name": "hiking equipment",
-      "parent": "sports equipment"
+      "name": "hiking_equipment",
+      "parent": "sports_equipment"
     },
     {
       "name": "hippopotamus",
       "parent": "mammal"
     },
     {
-      "name": "home appliance",
+      "name": "home_appliance",
       "parent": "root"
     },
     {
@@ -1017,16 +1017,16 @@
       "parent": "food"
     },
     {
-      "name": "horizontal bar",
-      "parent": "sports equipment"
+      "name": "horizontal_bar",
+      "parent": "sports_equipment"
     },
     {
       "name": "horse",
       "parent": "mammal"
     },
     {
-      "name": "hot dog",
-      "parent": "fast food"
+      "name": "hot_dog",
+      "parent": "fast_food"
     },
     {
       "name": "house",
@@ -1037,71 +1037,71 @@
       "parent": "plant"
     },
     {
-      "name": "human arm",
+      "name": "human_arm",
       "parent": "root"
     },
     {
-      "name": "human beard",
+      "name": "human_beard",
       "parent": "root"
     },
     {
-      "name": "human body",
+      "name": "human_body",
       "parent": "root"
     },
     {
-      "name": "human ear",
+      "name": "human_ear",
       "parent": "root"
     },
     {
-      "name": "human eye",
+      "name": "human_eye",
       "parent": "root"
     },
     {
-      "name": "human face",
+      "name": "human_face",
       "parent": "root"
     },
     {
-      "name": "human foot",
+      "name": "human_foot",
       "parent": "root"
     },
     {
-      "name": "human hair",
+      "name": "human_hair",
       "parent": "root"
     },
     {
-      "name": "human hand",
+      "name": "human_hand",
       "parent": "root"
     },
     {
-      "name": "human head",
+      "name": "human_head",
       "parent": "root"
     },
     {
-      "name": "human leg",
+      "name": "human_leg",
       "parent": "root"
     },
     {
-      "name": "human mouth",
+      "name": "human_mouth",
       "parent": "root"
     },
     {
-      "name": "human nose",
+      "name": "human_nose",
       "parent": "root"
     },
     {
       "name": "humidifier",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
-      "name": "ice cream",
+      "name": "ice_cream",
       "parent": "dessert"
     },
     {
-      "name": "indoor rower",
-      "parent": "sports equipment"
+      "name": "indoor_rower",
+      "parent": "sports_equipment"
     },
     {
-      "name": "infant bed",
+      "name": "infant_bed",
       "parent": "bed"
     },
     {
@@ -1118,7 +1118,7 @@
     },
     {
       "name": "isopod",
-      "parent": "marine invertebrates"
+      "parent": "marine_invertebrates"
     },
     {
       "name": "jacket",
@@ -1129,7 +1129,7 @@
       "parent": "root"
     },
     {
-      "name": "jaguar (animal)",
+      "name": "jaguar_animal",
       "parent": "root"
     },
     {
@@ -1138,10 +1138,10 @@
     },
     {
       "name": "jellyfish",
-      "parent": "marine invertebrates"
+      "parent": "marine_invertebrates"
     },
     {
-      "name": "jet ski",
+      "name": "jet_ski",
       "parent": "watercraft"
     },
     {
@@ -1158,22 +1158,22 @@
     },
     {
       "name": "kettle",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
-      "name": "kitchen & dining room table",
+      "name": "kitchen_dining_room_table",
       "parent": "table"
     },
     {
-      "name": "kitchen appliance",
+      "name": "kitchen_appliance",
       "parent": "kitchenware"
     },
     {
-      "name": "kitchen knife",
+      "name": "kitchen_knife",
       "parent": "tableware"
     },
     {
-      "name": "kitchen utensil",
+      "name": "kitchen_utensil",
       "parent": "kitchenware"
     },
     {
@@ -1186,7 +1186,7 @@
     },
     {
       "name": "knife",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
       "name": "koala",
@@ -1198,7 +1198,7 @@
     },
     {
       "name": "ladle",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
       "name": "ladybug",
@@ -1209,7 +1209,7 @@
       "parent": "root"
     },
     {
-      "name": "land vehicle",
+      "name": "land_vehicle",
       "parent": "vehicle"
     },
     {
@@ -1221,7 +1221,7 @@
       "parent": "root"
     },
     {
-      "name": "lavender (plant)",
+      "name": "lavender_plant",
       "parent": "root"
     },
     {
@@ -1233,11 +1233,11 @@
       "parent": "carnivore"
     },
     {
-      "name": "light bulb",
+      "name": "light_bulb",
       "parent": "root"
     },
     {
-      "name": "light switch",
+      "name": "light_switch",
       "parent": "root"
     },
     {
@@ -1273,7 +1273,7 @@
       "parent": "couch"
     },
     {
-      "name": "luggage and bags",
+      "name": "luggage_and_bags",
       "parent": "clothing"
     },
     {
@@ -1302,26 +1302,26 @@
     },
     {
       "name": "maracas",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "marine invertebrates",
+      "name": "marine_invertebrates",
       "parent": "invertebrate"
     },
     {
-      "name": "marine mammal",
+      "name": "marine_mammal",
       "parent": "mammal"
     },
     {
-      "name": "measuring cup",
-      "parent": "kitchen utensil"
+      "name": "measuring_cup",
+      "parent": "kitchen_utensil"
     },
     {
-      "name": "mechanical fan",
-      "parent": "home appliance"
+      "name": "mechanical_fan",
+      "parent": "home_appliance"
     },
     {
-      "name": "medical equipment",
+      "name": "medical_equipment",
       "parent": "root"
     },
     {
@@ -1329,12 +1329,12 @@
       "parent": "root"
     },
     {
-      "name": "microwave oven",
-      "parent": "home appliance"
+      "name": "microwave_oven",
+      "parent": "home_appliance"
     },
     {
       "name": "milk",
-      "parent": "dairy product"
+      "parent": "dairy_product"
     },
     {
       "name": "miniskirt",
@@ -1350,14 +1350,14 @@
     },
     {
       "name": "mixer",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
-      "name": "mixing bowl",
+      "name": "mixing_bowl",
       "parent": "tableware"
     },
     {
-      "name": "mobile phone",
+      "name": "mobile_phone",
       "parent": "telephone"
     },
     {
@@ -1365,12 +1365,12 @@
       "parent": "mammal"
     },
     {
-      "name": "moths and butterflies",
+      "name": "moths_and_butterflies",
       "parent": "insect"
     },
     {
       "name": "motorcycle",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "mouse",
@@ -1393,20 +1393,20 @@
       "parent": "food"
     },
     {
-      "name": "musical instrument",
+      "name": "musical_instrument",
       "parent": "root"
     },
     {
-      "name": "musical keyboard",
-      "parent": "musical instrument"
+      "name": "musical_keyboard",
+      "parent": "musical_instrument"
     },
     {
-      "name": "nail (construction)",
+      "name": "nail_construction",
       "parent": "root"
     },
     {
       "name": "necklace",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "nightstand",
@@ -1414,14 +1414,14 @@
     },
     {
       "name": "oboe",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "office building",
+      "name": "office_building",
       "parent": "building"
     },
     {
-      "name": "office supplies",
+      "name": "office_supplies",
       "parent": "root"
     },
     {
@@ -1429,7 +1429,7 @@
       "parent": "fruit"
     },
     {
-      "name": "organ (musical instrument)",
+      "name": "organ_musical_instrument",
       "parent": "root"
     },
     {
@@ -1442,7 +1442,7 @@
     },
     {
       "name": "oven",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
       "name": "owl",
@@ -1454,10 +1454,10 @@
     },
     {
       "name": "paddle",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
-      "name": "palm tree",
+      "name": "palm_tree",
       "parent": "tree"
     },
     {
@@ -1469,19 +1469,19 @@
       "parent": "bear"
     },
     {
-      "name": "paper cutter",
-      "parent": "office supplies"
+      "name": "paper_cutter",
+      "parent": "office_supplies"
     },
     {
-      "name": "paper towel",
+      "name": "paper_towel",
       "parent": "root"
     },
     {
       "name": "parachute",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
-      "name": "parking meter",
+      "name": "parking_meter",
       "parent": "root"
     },
     {
@@ -1494,7 +1494,7 @@
     },
     {
       "name": "pastry",
-      "parent": "baked goods"
+      "parent": "baked_goods"
     },
     {
       "name": "peach",
@@ -1506,15 +1506,15 @@
     },
     {
       "name": "pen",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
-      "name": "pencil case",
-      "parent": "office supplies"
+      "name": "pencil_case",
+      "parent": "office_supplies"
     },
     {
-      "name": "pencil sharpener",
-      "parent": "office supplies"
+      "name": "pencil_sharpener",
+      "parent": "office_supplies"
     },
     {
       "name": "penguin",
@@ -1529,23 +1529,23 @@
       "parent": "root"
     },
     {
-      "name": "personal care",
+      "name": "personal_care",
       "parent": "root"
     },
     {
-      "name": "personal flotation device",
+      "name": "personal_flotation_device",
       "parent": "root"
     },
     {
       "name": "piano",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "picnic basket",
+      "name": "picnic_basket",
       "parent": "container"
     },
     {
-      "name": "picture frame",
+      "name": "picture_frame",
       "parent": "root"
     },
     {
@@ -1561,7 +1561,7 @@
       "parent": "fruit"
     },
     {
-      "name": "pitcher (container)",
+      "name": "pitcher_container",
       "parent": "root"
     },
     {
@@ -1569,16 +1569,16 @@
       "parent": "food"
     },
     {
-      "name": "pizza cutter",
-      "parent": "kitchen utensil"
+      "name": "pizza_cutter",
+      "parent": "kitchen_utensil"
     },
     {
       "name": "plant",
       "parent": "root"
     },
     {
-      "name": "plastic bag",
-      "parent": "office supplies"
+      "name": "plastic_bag",
+      "parent": "office_supplies"
     },
     {
       "name": "plate",
@@ -1589,11 +1589,11 @@
       "parent": "tableware"
     },
     {
-      "name": "plumbing fixture",
+      "name": "plumbing_fixture",
       "parent": "root"
     },
     {
-      "name": "polar bear",
+      "name": "polar_bear",
       "parent": "bear"
     },
     {
@@ -1614,19 +1614,19 @@
     },
     {
       "name": "poster",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "potato",
       "parent": "vegetable"
     },
     {
-      "name": "power plugs and sockets",
+      "name": "power_plugs_and_sockets",
       "parent": "root"
     },
     {
-      "name": "pressure cooker",
-      "parent": "kitchen appliance"
+      "name": "pressure_cooker",
+      "parent": "kitchen_appliance"
     },
     {
       "name": "pretzel",
@@ -1638,11 +1638,11 @@
     },
     {
       "name": "pumpkin",
-      "parent": "squash (plant)"
+      "parent": "squash_plant"
     },
     {
-      "name": "punching bag",
-      "parent": "sports equipment"
+      "name": "punching_bag",
+      "parent": "sports_equipment"
     },
     {
       "name": "rabbit",
@@ -1654,14 +1654,14 @@
     },
     {
       "name": "racket",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "radish",
       "parent": "vegetable"
     },
     {
-      "name": "ratchet (device)",
+      "name": "ratchet_device",
       "parent": "root"
     },
     {
@@ -1669,19 +1669,19 @@
       "parent": "bird"
     },
     {
-      "name": "rays and skates",
+      "name": "rays_and_skates",
       "parent": "fish"
     },
     {
-      "name": "red panda",
+      "name": "red_panda",
       "parent": "carnivore"
     },
     {
       "name": "refrigerator",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
-      "name": "remote control",
+      "name": "remote_control",
       "parent": "root"
     },
     {
@@ -1697,15 +1697,15 @@
       "parent": "weapon"
     },
     {
-      "name": "ring binder",
-      "parent": "office supplies"
+      "name": "ring_binder",
+      "parent": "office_supplies"
     },
     {
       "name": "rocket",
       "parent": "aircraft"
     },
     {
-      "name": "roller skates",
+      "name": "roller_skates",
       "parent": "footwear"
     },
     {
@@ -1713,7 +1713,7 @@
       "parent": "flower"
     },
     {
-      "name": "rugby ball",
+      "name": "rugby_ball",
       "parent": "ball"
     },
     {
@@ -1725,7 +1725,7 @@
       "parent": "vegetable"
     },
     {
-      "name": "salt and pepper shakers",
+      "name": "salt_and_pepper_shakers",
       "parent": "tableware"
     },
     {
@@ -1742,7 +1742,7 @@
     },
     {
       "name": "saxophone",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "scale",
@@ -1754,11 +1754,11 @@
     },
     {
       "name": "scissors",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "scoreboard",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "scorpion",
@@ -1773,11 +1773,11 @@
       "parent": "root"
     },
     {
-      "name": "sea lion",
-      "parent": "marine mammal"
+      "name": "sea_lion",
+      "parent": "marine_mammal"
     },
     {
-      "name": "sea turtle",
+      "name": "sea_turtle",
       "parent": "turtle"
     },
     {
@@ -1789,20 +1789,20 @@
       "parent": "fish"
     },
     {
-      "name": "seat belt",
-      "parent": "auto part"
+      "name": "seat_belt",
+      "parent": "auto_part"
     },
     {
       "name": "segway",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
-      "name": "serving tray",
+      "name": "serving_tray",
       "parent": "tableware"
     },
     {
-      "name": "sewing machine",
-      "parent": "home appliance"
+      "name": "sewing_machine",
+      "parent": "home_appliance"
     },
     {
       "name": "shark",
@@ -1834,7 +1834,7 @@
     },
     {
       "name": "shower",
-      "parent": "plumbing fixture"
+      "parent": "plumbing_fixture"
     },
     {
       "name": "shrimp",
@@ -1842,15 +1842,15 @@
     },
     {
       "name": "sink",
-      "parent": "plumbing fixture"
+      "parent": "plumbing_fixture"
     },
     {
       "name": "skateboard",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "ski",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "skirt",
@@ -1869,8 +1869,8 @@
       "parent": "building"
     },
     {
-      "name": "slow cooker",
-      "parent": "kitchen appliance"
+      "name": "slow_cooker",
+      "parent": "kitchen_appliance"
     },
     {
       "name": "snack",
@@ -1886,7 +1886,7 @@
     },
     {
       "name": "snowboard",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "snowman",
@@ -1894,22 +1894,22 @@
     },
     {
       "name": "snowmobile",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "snowplow",
       "parent": "tool"
     },
     {
-      "name": "soap dispenser",
-      "parent": "bathroom accessory"
+      "name": "soap_dispenser",
+      "parent": "bathroom_accessory"
     },
     {
       "name": "sock",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
-      "name": "sofa bed",
+      "name": "sofa_bed",
       "parent": "couch"
     },
     {
@@ -1922,10 +1922,10 @@
     },
     {
       "name": "spatula",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
-      "name": "spice rack",
+      "name": "spice_rack",
       "parent": "kitchenware"
     },
     {
@@ -1934,18 +1934,18 @@
     },
     {
       "name": "spoon",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
-      "name": "sports equipment",
+      "name": "sports_equipment",
       "parent": "root"
     },
     {
-      "name": "sports uniform",
+      "name": "sports_uniform",
       "parent": "clothing"
     },
     {
-      "name": "squash (plant)",
+      "name": "squash_plant",
       "parent": "root"
     },
     {
@@ -1962,42 +1962,42 @@
     },
     {
       "name": "stapler",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "starfish",
-      "parent": "marine invertebrates"
+      "parent": "marine_invertebrates"
     },
     {
-      "name": "stationary bicycle",
-      "parent": "sports equipment"
+      "name": "stationary_bicycle",
+      "parent": "sports_equipment"
     },
     {
       "name": "stethoscope",
-      "parent": "medical equipment"
+      "parent": "medical_equipment"
     },
     {
       "name": "stool",
       "parent": "furniture"
     },
     {
-      "name": "stop sign",
-      "parent": "traffic sign"
+      "name": "stop_sign",
+      "parent": "traffic_sign"
     },
     {
       "name": "strawberry",
       "parent": "fruit"
     },
     {
-      "name": "street light",
+      "name": "street_light",
       "parent": "root"
     },
     {
       "name": "stretcher",
-      "parent": "medical equipment"
+      "parent": "medical_equipment"
     },
     {
-      "name": "studio couch",
+      "name": "studio_couch",
       "parent": "bed"
     },
     {
@@ -2005,7 +2005,7 @@
       "parent": "watercraft"
     },
     {
-      "name": "submarine sandwich",
+      "name": "submarine_sandwich",
       "parent": "sandwich"
     },
     {
@@ -2014,19 +2014,19 @@
     },
     {
       "name": "suitcase",
-      "parent": "luggage and bags"
+      "parent": "luggage_and_bags"
     },
     {
-      "name": "sun hat",
+      "name": "sun_hat",
       "parent": "hat"
     },
     {
       "name": "sunglasses",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "surfboard",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "sushi",
@@ -2037,11 +2037,11 @@
       "parent": "bird"
     },
     {
-      "name": "swim cap",
+      "name": "swim_cap",
       "parent": "clothing"
     },
     {
-      "name": "swimming pool",
+      "name": "swimming_pool",
       "parent": "root"
     },
     {
@@ -2054,18 +2054,18 @@
     },
     {
       "name": "syringe",
-      "parent": "medical equipment"
+      "parent": "medical_equipment"
     },
     {
       "name": "table",
       "parent": "furniture"
     },
     {
-      "name": "table tennis racket",
+      "name": "table_tennis_racket",
       "parent": "racket"
     },
     {
-      "name": "tablet computer",
+      "name": "tablet_computer",
       "parent": "root"
     },
     {
@@ -2078,11 +2078,11 @@
     },
     {
       "name": "tank",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "tap",
-      "parent": "plumbing fixture"
+      "parent": "plumbing_fixture"
     },
     {
       "name": "tart",
@@ -2090,7 +2090,7 @@
     },
     {
       "name": "taxi",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "tea",
@@ -2101,7 +2101,7 @@
       "parent": "tableware"
     },
     {
-      "name": "teddy bear",
+      "name": "teddy_bear",
       "parent": "toy"
     },
     {
@@ -2113,11 +2113,11 @@
       "parent": "root"
     },
     {
-      "name": "tennis ball",
+      "name": "tennis_ball",
       "parent": "ball"
     },
     {
-      "name": "tennis racket",
+      "name": "tennis_racket",
       "parent": "racket"
     },
     {
@@ -2134,31 +2134,31 @@
     },
     {
       "name": "tie",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "tiger",
       "parent": "carnivore"
     },
     {
-      "name": "tin can",
+      "name": "tin_can",
       "parent": "container"
     },
     {
       "name": "tire",
-      "parent": "auto part"
+      "parent": "auto_part"
     },
     {
       "name": "toaster",
-      "parent": "home appliance"
+      "parent": "home_appliance"
     },
     {
       "name": "toilet",
-      "parent": "plumbing fixture"
+      "parent": "plumbing_fixture"
     },
     {
-      "name": "toilet paper",
-      "parent": "office supplies"
+      "name": "toilet_paper",
+      "parent": "office_supplies"
     },
     {
       "name": "tomato",
@@ -2170,7 +2170,7 @@
     },
     {
       "name": "toothbrush",
-      "parent": "personal care"
+      "parent": "personal_care"
     },
     {
       "name": "torch",
@@ -2182,7 +2182,7 @@
     },
     {
       "name": "towel",
-      "parent": "bathroom accessory"
+      "parent": "bathroom_accessory"
     },
     {
       "name": "tower",
@@ -2193,31 +2193,31 @@
       "parent": "root"
     },
     {
-      "name": "traffic light",
+      "name": "traffic_light",
       "parent": "root"
     },
     {
-      "name": "traffic sign",
+      "name": "traffic_sign",
       "parent": "root"
     },
     {
       "name": "train",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
-      "name": "training bench",
-      "parent": "sports equipment"
+      "name": "training_bench",
+      "parent": "sports_equipment"
     },
     {
       "name": "treadmill",
-      "parent": "sports equipment"
+      "parent": "sports_equipment"
     },
     {
       "name": "tree",
       "parent": "plant"
     },
     {
-      "name": "tree house",
+      "name": "tree_house",
       "parent": "building"
     },
     {
@@ -2226,7 +2226,7 @@
     },
     {
       "name": "trombone",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "trousers",
@@ -2234,11 +2234,11 @@
     },
     {
       "name": "truck",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "trumpet",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
       "name": "turkey",
@@ -2250,11 +2250,11 @@
     },
     {
       "name": "umbrella",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "unicycle",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "van",
@@ -2273,15 +2273,15 @@
       "parent": "root"
     },
     {
-      "name": "vehicle registration plate",
-      "parent": "auto part"
+      "name": "vehicle_registration_plate",
+      "parent": "auto_part"
     },
     {
       "name": "violin",
-      "parent": "musical instrument"
+      "parent": "musical_instrument"
     },
     {
-      "name": "volleyball (ball)",
+      "name": "volleyball_ball",
       "parent": "root"
     },
     {
@@ -2289,11 +2289,11 @@
       "parent": "food"
     },
     {
-      "name": "waffle iron",
-      "parent": "kitchen appliance"
+      "name": "waffle_iron",
+      "parent": "kitchen_appliance"
     },
     {
-      "name": "wall clock",
+      "name": "wall_clock",
       "parent": "furniture"
     },
     {
@@ -2301,16 +2301,16 @@
       "parent": "furniture"
     },
     {
-      "name": "washing machine",
-      "parent": "home appliance"
+      "name": "washing_machine",
+      "parent": "home_appliance"
     },
     {
-      "name": "waste container",
+      "name": "waste_container",
       "parent": "container"
     },
     {
       "name": "watch",
-      "parent": "fashion accessory"
+      "parent": "fashion_accessory"
     },
     {
       "name": "watercraft",
@@ -2326,23 +2326,23 @@
     },
     {
       "name": "whale",
-      "parent": "marine mammal"
+      "parent": "marine_mammal"
     },
     {
       "name": "wheel",
-      "parent": "auto part"
+      "parent": "auto_part"
     },
     {
       "name": "wheelchair",
-      "parent": "land vehicle"
+      "parent": "land_vehicle"
     },
     {
       "name": "whisk",
-      "parent": "kitchen utensil"
+      "parent": "kitchen_utensil"
     },
     {
       "name": "whiteboard",
-      "parent": "office supplies"
+      "parent": "office_supplies"
     },
     {
       "name": "willow",
@@ -2353,7 +2353,7 @@
       "parent": "root"
     },
     {
-      "name": "window blind",
+      "name": "window_blind",
       "parent": "root"
     },
     {
@@ -2361,15 +2361,15 @@
       "parent": "drink"
     },
     {
-      "name": "wine glass",
+      "name": "wine_glass",
       "parent": "tableware"
     },
     {
-      "name": "wine rack",
+      "name": "wine_rack",
       "parent": "furniture"
     },
     {
-      "name": "winter melon",
+      "name": "winter_melon",
       "parent": "vegetable"
     },
     {
@@ -2381,8 +2381,8 @@
       "parent": "person"
     },
     {
-      "name": "wood-burning stove",
-      "parent": "home appliance"
+      "name": "wood_burning_stove",
+      "parent": "home_appliance"
     },
     {
       "name": "woodpecker",
@@ -2402,7 +2402,7 @@
     },
     {
       "name": "zucchini",
-      "parent": "squash (plant)"
+      "parent": "squash_plant"
     }
   ]
 }

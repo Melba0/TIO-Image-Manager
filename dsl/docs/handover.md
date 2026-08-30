@@ -214,9 +214,8 @@ $ : (any(hist_value(obj, 0) + hist_value(obj, 31) > 0.3))   # 红色占比高
 1. **扩展包已删除**：`models/extensions/` 目录为空，`registry.json` 的 `active_extensions` 也为空。
    `>>` 细化当前不可用。恢复方式：
    ```powershell
-   python make_ext_model.py 3 models/extensions/demo_v1/model.pt
-   python export_ext_onnx.py models/extensions/demo_v1/model.pt models/extensions/demo_v1/model.onnx 224
-   # 再手写 config.json，并把 name 加入 registry.json 的 active_extensions
+   # 自行训练/转换扩展模型为 .onnx（make_ext_model.py / export_ext_onnx.py 已移除）
+   # 手写 models/extensions/<name>/config.json，并把 name 加入 registry.json 的 active_extensions
    ```
 2. **Windows 长路径**：onnx 等 Python 包安装若报"文件名或扩展名太长"，
    需开启 `LongPathsEnabled` 或用解压方式安装。
@@ -231,7 +230,7 @@ $ : (any(hist_value(obj, 0) + hist_value(obj, 31) > 0.3))   # 红色占比高
 
 ## 9. 相关文档索引
 - [README](README.md) — 总览与快速开始
-- [Python 工具脚本说明](python_tools.md) — export_yolov8 / export_ext_onnx / make_classes / make_ext_model
+- [Python 工具脚本说明](python_tools.md) — export_yolov8
 - [主模型包内部 JSON 格式](base_model_pack_format.md)
 - [扩展包内部 JSON 格式](extension_pack_format.md)
 - [DSL 语言参考](dsl_reference.md)（旧语法为主）

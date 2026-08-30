@@ -44,6 +44,7 @@ static void printUsage() {
               << "  --list-models    list all registered base models and exit\n"
               << "  --json           output the query result as JSON to stdout\n"
               << "                   (DSL read from --dsl, a script file, or stdin until EOF)\n"
+              << "  --warmup         build/refresh the inference cache and exit (no query)\n"
               << "  --hard           boolean filtering at score 0.5 instead of soft ranking\n"
               << "  -h, --help       show this help\n"
               << "No arguments starts the interactive REPL.\n";
@@ -306,6 +307,7 @@ int main(int argc, char* argv[]) {
     bool list_models = false;
     bool hard_mode = false;
     bool json_mode = false;
+    bool warmup_mode = false;
     for (size_t i = 1; i < args.size(); ++i) {
         const std::string& a = args[i];
         if (a == "--base" && i + 1 < args.size()) {
@@ -338,6 +340,9 @@ int main(int argc, char* argv[]) {
             list_models = true;
         } else if (a == "--json") {
             json_mode = true;
+        } else if (a == "--warmup") {
+            warmup_mode = true;
+            json_mode = true;   // route progress to stderr, keep stdout pure JSON
         } else if (a == "--hard") {
             hard_mode = true;
         } else if (a == "-h" || a == "--help") {
@@ -550,6 +555,20 @@ int main(int argc, char* argv[]) {
     if (!cache.ensureCacheReady()) {
         std::cerr << "Failed to load or build cache." << std::endl;
         return 1;
+    }
+
+    // --warmup: cache is ready; the GUI calls this at startup so the first
+    // real query is fast.  Emit a JSON summary on stdout and exit.
+    if (warmup_mode) {
+        nlohmann::json out;
+        out["type"] = "warmup";
+        out["photo_dir"] = photo_dir;
+        out["images"] = (int)cache.getPhotoCache().images.size();
+        std::string json_str = out.dump();
+        std::fwrite(json_str.data(), 1, json_str.size(), stdout);
+        std::fputc('\n', stdout);
+        std::fflush(stdout);
+        return 0;
     }
 
     std::unique_ptr<Context> ctx =

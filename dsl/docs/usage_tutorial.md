@@ -125,10 +125,14 @@ build\dsl.exe --list-models         # 列出所有注册的基座模型
 `cnt(fruit)` 既统计类别名为 `fruit` 的对象，也统计 `apple`/`banana` 等子类：
 
 ```dsl
-cnt(fruit)                        # 全库水果总数
-$ : (cnt(human) > 2)              # human（含降级）超过 2 个的图片
-$ : (any(original_class == "car"))   # 被降级为 vehicle 的汽车
+cnt(fruit)                          # 全库水果总数
+$ : (cnt(person) > 2)               # person 超过 2 个的图片
+$ : (cnt(animal) > 0)               # animal 及其全部子类（cat/dog/…）
 ```
+
+> 类别名与 `classes.json` 完全一致：小写，多词类别用下划线（如 `traffic_light`、
+> `stop_sign`、`mobile_phone`）。父类别（`fruit`/`food`/`animal`/`vehicle`…）就是
+> 模型的直接输出类别。
 
 ## 4. 标签预筛选（Tag Pre-Filter）
 

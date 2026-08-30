@@ -68,6 +68,7 @@ private:
     void loadSavedTagFilters();
     void saveTagFilters();
     QString tagFilterSummary() const;
+    void startWarmup();
 
     // search UI
     QWidget* searchPage_;
@@ -103,5 +104,6 @@ private:
     QByteArray engineErrBuf_;
     int runs_ = 0, cacheHits_ = 0;
     bool showScores_ = true;
+    bool warmupRunning_ = false;   // engine launched with --warmup at startup
     QVector<QPair<QString, QStringList>> tagFilters_;   // active tag pre-filter
 };
