@@ -44,6 +44,13 @@ void ExtensionManager::scan() {
                 QJsonObject o = QJsonDocument::fromJson(cfg.readAll()).object();
                 pack.parentClass = o["parent_class"].toString();
                 for (const QJsonValue& c : o["children"].toArray()) pack.children << c.toString();
+                QJsonObject cap = o["capabilities"].toObject();
+                pack.canCluster = cap["can_cluster"].toBool();
+                pack.clusterName = cap["cluster_name"].toString();
+                QJsonObject gui = o["gui"].toObject();
+                pack.groupLabel = gui["group_label"].toString();
+                pack.icon = gui["icon"].toString();
+                pack.showInSidebar = gui.contains("show_in_sidebar") ? gui["show_in_sidebar"].toBool() : true;
             }
             packs_.append(pack);
         }

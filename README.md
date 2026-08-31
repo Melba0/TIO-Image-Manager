@@ -90,10 +90,7 @@ tio/
 │   ├── cache/              # 运行时生成 / generated at runtime
 │   ├── config/             # settings.ini（GUI 设置 + 推理阈值）
 │   ├── docs/               # 中文文档 / Chinese docs
-│   ├── export_yolov8.py    # 模型导出 / Python model-export tool
-│   ├── export_places365.py # Places365 导出 / scene-model export tool
-│   └── caffe_places365_to_onnx.py  # Caffe GoogLeNet -> ONNX / caffe scene converter
-└── gui/                    # Qt 6 桌面端 / the Qt GUI
+│   └── gui/                # Qt 6 桌面端 / the Qt GUI
     └── build/              # 产物 tio.exe + 伴生 dsl.exe（POST_BUILD 自动部署）
 ```
 

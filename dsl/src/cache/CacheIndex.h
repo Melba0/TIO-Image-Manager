@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include "Types.h"
 
@@ -24,6 +25,11 @@ struct CacheIndex {
     int next_obj_id = 0;   // next globally-unique object id
     int next_img_id = 0;   // next image id
     std::unordered_map<std::string, CacheEntry> entries;  // key: relative path
+
+    // User-created virtual albums: collection name -> list of image relative
+    // paths (logical grouping only; files are never moved).  Optional field
+    // (absent/empty on older indexes) so the cache version is NOT bumped.
+    std::map<std::string, std::vector<std::string>> collections;
 
     // Load from a cache_index.json file.  Returns false when the file is
     // missing or cannot be parsed (caller falls back to a full rebuild).

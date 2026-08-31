@@ -11,6 +11,10 @@ namespace {
 
 // ---- DetectedObject <-> JSON ----
 json objectToJson(const DetectedObject& o) {
+    json emb = json::object();
+    for (const auto& [k, v] : o.embeddings) emb[k] = v;
+    json cids = json::object();
+    for (const auto& [k, v] : o.cluster_ids) cids[k] = v;
     return json{
         {"class", o.class_name},
         {"x", o.x}, {"y", o.y}, {"w", o.w}, {"h", o.h}, {"area", o.area},
@@ -28,6 +32,8 @@ json objectToJson(const DetectedObject& o) {
                       {"dominant_color_name", o.attr.dominant_color_name},
                       {"hue_hist", o.attr.hue_hist},
                       {"local_blur_score", o.attr.local_blur_score}}},
+        {"embeddings", emb},
+        {"cluster_ids", cids},
     };
 }
 
@@ -63,6 +69,16 @@ DetectedObject objectFromJson(const json& obj) {
             for (int i = 0; i < 32 && i < (int)hh.size(); ++i) d.attr.hue_hist[i] = hh[i].get<float>();
         }
     }
+    if (obj.contains("embeddings") && obj["embeddings"].is_object()) {
+        for (const auto& [k, v] : obj["embeddings"].items()) {
+            for (const auto& f : v) d.embeddings[k].push_back(f.get<float>());
+        }
+    }
+    if (obj.contains("cluster_ids") && obj["cluster_ids"].is_object()) {
+        for (const auto& [k, v] : obj["cluster_ids"].items()) {
+            d.cluster_ids[k] = v.get<std::string>();
+        }
+    }
     return d;
 }
 
@@ -94,6 +110,7 @@ json attrsToJson(const ImageAttrs& ia) {
         {"dominant_scene", ia.dominant_scene},
         {"indoor_score", ia.indoor_score},
         {"scene_vector", ia.scene_vector},
+        {"cluster_groups", ia.cluster_groups},
     };
 }
 
@@ -135,6 +152,11 @@ ImageAttrs attrsFromJson(const json& ia) {
     }
     a.dominant_scene = ia.value("dominant_scene", "");
     a.indoor_score = ia.value("indoor_score", 0.f);
+    if (ia.contains("cluster_groups") && ia["cluster_groups"].is_object()) {
+        for (const auto& [k, v] : ia["cluster_groups"].items()) {
+            for (const auto& c : v) a.cluster_groups[k].push_back(c.get<std::string>());
+        }
+    }
     return a;
 }
 
@@ -164,6 +186,14 @@ bool CacheIndex::loadFromFile(const std::string& path) {
             if (e.contains("img_attrs")) ce.img_attrs = attrsFromJson(e["img_attrs"]);
             for (const auto& o : e.value("objects", json::array())) ce.objects.push_back(objectFromJson(o));
             entries[rel] = std::move(ce);
+        }
+
+        // User-created collections (optional; older indexes have none).
+        collections.clear();
+        if (j.contains("collections") && j["collections"].is_object()) {
+            for (const auto& [name, paths] : j["collections"].items()) {
+                for (const auto& p : paths) collections[name].push_back(p.get<std::string>());
+            }
         }
         return true;
     } catch (const std::exception&) {
@@ -213,6 +243,14 @@ bool CacheIndex::saveToFile(const std::string& path) const {
         j["photo_dirs"] = photo_dirs;
         j["next_obj_id"] = next_obj_id;
         j["next_img_id"] = next_img_id;
+
+        if (!collections.empty()) {
+            json cols = json::object();
+            for (const auto& [name, paths] : collections) {
+                cols[name] = paths;
+            }
+            j["collections"] = cols;
+        }
 
         json e = json::object();
         for (const auto& [rel, ce] : entries) {

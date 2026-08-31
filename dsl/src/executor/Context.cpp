@@ -52,6 +52,12 @@ std::unordered_set<std::string> Context::getAllImagePaths() const {
     return paths;
 }
 
+std::unordered_set<std::string> Context::getCollection(const std::string& name) const {
+    auto it = cache_.collections.find(name);
+    if (it == cache_.collections.end()) return {};
+    return std::unordered_set<std::string>(it->second.begin(), it->second.end());
+}
+
 void Context::registerMacro(const std::string& name, MacroDef def) {
     macros_[name] = std::move(def);
 }

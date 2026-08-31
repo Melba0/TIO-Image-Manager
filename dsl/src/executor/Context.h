@@ -125,6 +125,11 @@ public:
     // Get all image paths
     std::unordered_set<std::string> getAllImagePaths() const;
 
+    // ---- virtual albums (collections) ----
+    // Return the image set of a user-created collection (empty set if the
+    // collection does not exist or has no images).
+    std::unordered_set<std::string> getCollection(const std::string& name) const;
+
     // ---- pre-filter pipeline (applied before the DSL runs) ----
     // When active, `$` (and therefore every image-set iteration) only covers
     // the pre-filtered image ids instead of the whole gallery.  An active

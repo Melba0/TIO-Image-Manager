@@ -85,6 +85,21 @@ people = % $ : (any(class == "person"))
 - `ImageSet : (cond)` → 逐图求值图片级条件 `cond`，保留满足的图片（FilterExpr）。
 - `any(cond)` / `all(cond)` → 当前图片/集合范围内，是否存在（全部）满足条件的对象。
 
+### 相簿集合 `collection("名称")`
+
+返回用户创建的**虚拟相簿**（相簿由 GUI 管理，存储在 `cache_index.json` 的 `collections`
+字段中，仅逻辑分组，不移动磁盘文件）的图片集（ImageSet），可与集合运算、筛选自由组合：
+
+```dsl
+collection("我的旅行")                              # 相簿中的全部图片
+collection("我的旅行") : (any(class == "cat"))      # 在相簿中搜猫
+collection("猫图精选") | collection("狗图精选")      # 并集
+```
+
+- 相簿名与 GUI 中的名称完全一致（UTF-8，区分大小写）。
+- 相簿不存在时返回空集（不会报错）。
+- `collection(...)` 不受标签预筛选影响（`$` 仍遵守预筛选；可用 `& $` 取交集）。
+
 ### 扩展操作符 `>>`
 将 ObjectSet 中匹配扩展包父类的对象，裁剪区域后运行扩展模型，生成新的 ObjectSet
 （子对象带 `parent_id` 关联父对象）。
@@ -249,6 +264,20 @@ warm & bright         # 裸调用：把当前对象广播给单参数宏
 | `left(x)` `right(x)` | 中心 x 在左 / 右 1/3 |
 | `top(x)` `bottom(x)` | 中心 y 在上 / 下 1/3 |
 | `square(x)` | `abs(x.w/x.h - 1) < 0.1` |
+
+**聚类宏**（V2，读取对象缓存的聚类 id；需启用聚类扩展包）：
+
+| 宏 | 说明 |
+|----|------|
+| `cluster_id(obj, "face_cluster")` | 对象在该聚类下的 id（字符串，未分配则为空串） |
+| `cluster_sim(a, b, "face_cluster")` | a、b 是否在同一聚类（模糊分 1/0） |
+
+```dsl
+# 属于聚类 person_001 的图片
+$ : (any(cluster_id(obj, "face_cluster") == "face_cluster_person_001"))
+# 两张图存在同一聚类对象
+$ : (any(cluster_sim(obj, obj, "face_cluster")))
+```
 
 **关系宏**（接收两个对象）：
 

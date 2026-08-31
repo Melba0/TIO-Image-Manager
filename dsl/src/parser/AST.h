@@ -53,6 +53,12 @@ struct UnaryExpr : Expr {
 
 struct DollarExpr : Expr {};
 
+// `collection("name")` : the image set of a user-created virtual album.
+struct CollectionExpr : Expr {
+    std::string name;
+    explicit CollectionExpr(std::string n) : name(std::move(n)) {}
+};
+
 struct CaretExpr : Expr {
     std::unique_ptr<Expr> operand;
     explicit CaretExpr(std::unique_ptr<Expr> e) : operand(std::move(e)) {}
@@ -172,6 +178,12 @@ enum class SceneFn {
     IsIndoor        // img_is_indoor()       -> indoor probability (0..1)
 };
 
+// Built-in clustering macros (read the object's cached cluster_ids).
+enum class ClusterFn {
+    ClusterId,      // cluster_id(obj, cluster_name)      -> cluster id string ("" if none)
+    ClusterSim      // cluster_sim(a, b, cluster_name)    -> 1 if a and b share a cluster
+};
+
 // Unified macro definition table entry (built-in and user macros are identical here).
 struct MacroDef {
     std::vector<std::string> params;
@@ -186,6 +198,8 @@ struct MacroDef {
     ImgFn img_fn = ImgFn::OverExposure;
     bool is_scene = false;        // true -> evaluated by evalSceneMacro()
     SceneFn scene_fn = SceneFn::SceneProb;
+    bool is_cluster = false;      // true -> evaluated by evalClusterMacro()
+    ClusterFn cluster_fn = ClusterFn::ClusterId;
 
     static MacroDef ast(std::vector<std::string> params, std::shared_ptr<Expr> body) {
         MacroDef d;
@@ -225,6 +239,13 @@ struct MacroDef {
         MacroDef d;
         d.is_scene = true;
         d.scene_fn = fn;
+        d.params.resize(argc);
+        return d;
+    }
+    static MacroDef cluster(ClusterFn fn, int argc) {
+        MacroDef d;
+        d.is_cluster = true;
+        d.cluster_fn = fn;
         d.params.resize(argc);
         return d;
     }

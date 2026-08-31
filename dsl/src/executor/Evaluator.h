@@ -19,6 +19,7 @@ private:
     Value evalBinary(const BinaryExpr& node);
     Value evalUnary(const UnaryExpr& node);
     Value evalDollar(const DollarExpr& node);
+    Value evalCollection(const CollectionExpr& node);
     Value evalCaret(const CaretExpr& node);
     Value evalQuantifier(const QuantifierExpr& node);
     Value evalFilter(const FilterExpr& node);
@@ -46,6 +47,7 @@ private:
     Value evalHistMacro(const MacroCallExpr& node, const MacroDef* m);
     Value evalImgMacro(const MacroCallExpr& node, const MacroDef* m);
     Value evalSceneMacro(const MacroCallExpr& node, const MacroDef* m);
+    Value evalClusterMacro(const MacroCallExpr& node, const MacroDef* m);
     static float colorMatch(const Attr& a, const std::string& name);
     static float cosineHistSim(const HistVec& a, const HistVec& b);
     // Highest-confidence object of `cls` (is-a aware) in the current image.

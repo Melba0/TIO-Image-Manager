@@ -11,7 +11,7 @@ if(NOT CMAKE_PREFIX_PATH)
     set(CMAKE_PREFIX_PATH "D:/Qt/6.10.1/mingw_64" ${CMAKE_PREFIX_PATH})
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network Concurrent PrintSupport)
 if(NOT Qt6_FOUND)
     message(FATAL_ERROR "Qt6 not found. Install Qt 6 (Widgets + Network + Concurrent) and set CMAKE_PREFIX_PATH.")
 endif()
@@ -46,11 +46,21 @@ add_executable(tio WIN32
     managers/ExtensionManager.cpp
     managers/LibraryManager.h
     managers/LibraryManager.cpp
+    managers/CollectionManager.h
+    managers/CollectionManager.cpp
+    managers/SmartCollectionManager.h
+    managers/SmartCollectionManager.cpp
+    managers/ClusterNameMapping.h
+    managers/ClusterNameMapping.cpp
+    ExportReportDialog.h
+    ExportReportDialog.cpp
+    BatchEditDialog.h
+    BatchEditDialog.cpp
     app.rc
     resources.qrc
 )
 
-target_link_libraries(tio PRIVATE Qt6::Widgets Qt6::Network Qt6::Concurrent)
+target_link_libraries(tio PRIVATE Qt6::Widgets Qt6::Network Qt6::Concurrent Qt6::PrintSupport)
 
 # The GUI drives the console engine (../dsl/build/dsl.exe) via QProcess; no
 # ONNX Runtime linkage is needed here.  Copy the engine + its runtime DLLs next

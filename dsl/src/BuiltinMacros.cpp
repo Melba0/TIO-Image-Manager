@@ -91,6 +91,10 @@ void registerBuiltinMacros(Context& ctx) {
     ctx.registerMacro("img_scene_vec", MacroDef::scene(SceneFn::SceneVec, 0));  // img_scene_vec() (internal)
     ctx.registerMacro("img_is_indoor", MacroDef::scene(SceneFn::IsIndoor, 0));  // img_is_indoor()
 
+    // ---- built-in clustering macros (cached object cluster_ids) ----
+    ctx.registerMacro("cluster_id", MacroDef::cluster(ClusterFn::ClusterId, 2));   // cluster_id(obj, name)
+    ctx.registerMacro("cluster_sim", MacroDef::cluster(ClusterFn::ClusterSim, 3)); // cluster_sim(a, b, name)
+
     // ---- spatial / geometric macros ----
     reg(ctx, "big", {"x"}, bin(op("x", "area"), BinOp::GT, num(0.2)));
     reg(ctx, "small", {"x"}, bin(op("x", "area"), BinOp::LT, num(0.05)));

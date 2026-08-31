@@ -70,6 +70,7 @@ set(SOURCES
     src/parser/Parser.cpp
     src/executor/Context.cpp
     src/executor/Evaluator.cpp
+    src/cluster/Clustering.cpp
     src/utils/filesystem_utils.cpp
     src/utils/exif_reader.cpp
     src/ExtensionManager.cpp

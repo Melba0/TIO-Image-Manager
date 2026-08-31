@@ -9,6 +9,8 @@
 #include "CacheIndex.h"
 #include "../scene/SceneInference.h"
 
+class ExtensionManager;
+
 struct ImageCacheEntry {
     std::string path;
     std::vector<DetectedObject> objects;  // objects live in the cache WITHOUT image_path filled
@@ -19,6 +21,8 @@ struct ImageCacheEntry {
 struct PhotoCache {
     std::vector<ImageCacheEntry> images;
     std::string photo_dir;
+    // Virtual albums: collection name -> image relative paths (logical grouping).
+    std::map<std::string, std::vector<std::string>> collections;
 };
 
 class CacheManager {
@@ -46,6 +50,10 @@ public:
     // ensureCacheReady() rebuilds from the new active base model.
     void invalidate();
 
+    // Wire the extension manager so clustering packs can extract embeddings
+    // during cache inference and drive the clustering pass after a rebuild.
+    void setExtensionManager(ExtensionManager* ext) { ext_mgr_ = ext; }
+
     const PhotoCache& getPhotoCache() const { return cache_data_; }
     bool isCacheValid() const { return cache_valid_; }
 
@@ -62,6 +70,23 @@ public:
     // the given TagFilters (values are OR-ed; an empty values list matches any
     // value for that key).  Empty result when filters is empty.
     std::unordered_set<std::string> applyTagFilters(const std::vector<TagFilter>& filters) const;
+
+    // ---- virtual album (collection) management ----
+    // Add an image (relative path) to a collection, creating it if needed.
+    void addToCollection(const std::string& name, const std::string& rel_path);
+    // Remove an image from a collection (the collection is kept, even if empty).
+    void removeFromCollection(const std::string& name, const std::string& rel_path);
+    // Remove a whole collection.
+    void deleteCollection(const std::string& name);
+    // Rename an image's cache path (used when a file is renamed on disk):
+    // updates the entry key and every collection that referenced the old path.
+    bool renameImage(const std::string& old_rel, const std::string& new_rel);
+
+    // ---- clustering (V2) ----
+    // Re-run the clustering pass for every active clustering extension pack:
+    // gather all cached embeddings, assign deterministic cluster ids, and
+    // rebuild each image's cluster_groups.  Called after a cache build/update.
+    void runClustering();
 
 private:
     // Load cache_index.json for the active model.  Falls back to migrating the
@@ -116,4 +141,6 @@ private:
     bool scene_tried_ = false;
 
     std::unordered_map<std::string, size_t> image_index_;
+
+    ExtensionManager* ext_mgr_ = nullptr;   // clustering packs (may be null)
 };

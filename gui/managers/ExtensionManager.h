@@ -9,6 +9,13 @@ struct ExtPack {
     QStringList children;
     QString path;       // absolute folder
     bool active = false;
+
+    // ---- clustering capability (V2) ----
+    bool canCluster = false;        // capabilities.can_cluster
+    QString clusterName;            // capabilities.cluster_name
+    QString groupLabel;             // gui.group_label
+    QString icon;                   // gui.icon
+    bool showInSidebar = true;      // gui.show_in_sidebar
 };
 
 // Scans extension packs (models/extensions + legacy extensions) and toggles

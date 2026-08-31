@@ -543,6 +543,9 @@ int main(int argc, char* argv[]) {
                        fallback_threshold, base_conf_threshold, iou_threshold,
                        (fs::path(project_dir) / "models" / "scene" / "places365_googlenet.onnx").string(),
                        (fs::path(project_dir) / "models" / "scene" / "categories_places365.txt").string());
+    // Let the cache pipeline drive clustering-pack embedding extraction and the
+    // global clustering pass (extensions are discovered/activated above).
+    cache.setExtensionManager(&ext_mgr);
     if (!cache.ensureCacheReady()) {
         std::cerr << "Failed to load or build cache." << std::endl;
         return 1;

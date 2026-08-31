@@ -3,10 +3,15 @@
 #include "LanguageManager.h"
 #include "ImageDetailsDialog.h"
 #include "TagFilterDialog.h"
+#include "ExportReportDialog.h"
+#include "BatchEditDialog.h"
 #include "managers/SettingsManager.h"
 #include "managers/ModelManager.h"
 #include "managers/ExtensionManager.h"
 #include "managers/LibraryManager.h"
+#include "managers/CollectionManager.h"
+#include "managers/SmartCollectionManager.h"
+#include "managers/ClusterNameMapping.h"
 #include <QApplication>
 #include <QPlainTextEdit>
 #include <QListWidget>
@@ -29,11 +34,69 @@
 #include <QJsonArray>
 #include <QPixmap>
 #include <QListWidgetItem>
+#include <QTreeWidgetItem>
 #include <QMessageBox>
 #include <QFontDatabase>
 #include <QAction>
 #include <QEvent>
 #include <QRegularExpression>
+#include <QInputDialog>
+#include <QMenu>
+#include <QToolBar>
+#include <QSet>
+#include <QMimeData>
+#include <QPalette>
+#include <QColor>
+#include <algorithm>
+
+QMimeData* ImageGrid::mimeData(const QList<QListWidgetItem*>& items) const {
+    QStringList paths;
+    for (QListWidgetItem* it : items) {
+        const QString p = it->data(Qt::UserRole).toString();
+        if (!p.isEmpty()) paths << p;
+    }
+    QMimeData* md = new QMimeData();
+    md->setData("application/x-tio-images", paths.join('\n').toUtf8());
+    md->setText(paths.join('\n'));
+    return md;
+}
+
+void CollectionTree::dragEnterEvent(QDragEnterEvent* e) {
+    if (e->mimeData()->hasFormat("application/x-tio-images")) {
+        e->acceptProposedAction();
+    } else {
+        QTreeWidget::dragEnterEvent(e);
+    }
+}
+
+void CollectionTree::dragMoveEvent(QDragMoveEvent* e) {
+    if (e->mimeData()->hasFormat("application/x-tio-images")) {
+        e->acceptProposedAction();
+    } else {
+        QTreeWidget::dragMoveEvent(e);
+    }
+}
+
+void CollectionTree::dropEvent(QDropEvent* e) {
+    if (e->mimeData()->hasFormat("application/x-tio-images")) {
+        QTreeWidgetItem* target = itemAt(e->position().toPoint());
+        if (target && target->data(0, Qt::UserRole).toString() == "normal") {
+            const QString name = target->data(0, Qt::UserRole + 1).toString();
+            if (!name.isEmpty()) {
+                const QStringList paths =
+                    QString::fromUtf8(e->mimeData()->data("application/x-tio-images"))
+                        .split('\n', Qt::SkipEmptyParts);
+                if (!paths.isEmpty()) emit imagesDropped(name, paths);
+            }
+            e->acceptProposedAction();
+            return;
+        }
+        // Dropped on empty space / a branch header: do nothing.
+        e->acceptProposedAction();
+        return;
+    }
+    QTreeWidget::dropEvent(e);
+}
 
 static const char* kDarkQss = R"(
 QMainWindow, QDialog { background-color: #1e1e1e; }
@@ -81,6 +144,24 @@ QListWidget#navList { background-color: #1e1e1e; color: #cccccc; }
 QListWidget#navList::item { background-color: #1e1e1e; color: #cccccc; padding: 8px 6px; }
 QListWidget#navList::item:hover { background-color: #2d2d30; }
 QListWidget#navList::item:selected { background-color: #0e639c; color: #ffffff; }
+QToolBar { background-color: #252526; border: none; spacing: 4px; }
+QToolBar QToolButton { background: transparent; color: #cccccc; padding: 4px 8px; border-radius: 3px; }
+QToolBar QToolButton:hover { background-color: #0e639c; color: #ffffff; }
+QToolBar QToolButton:pressed { background-color: #0a4b74; }
+QToolBar::separator { background: #3e3e42; width: 1px; margin: 4px 2px; }
+QTreeWidget { background-color: #1e1e1e; color: #d4d4d4; border: none; outline: none; }
+QTreeWidget::item { background-color: #1e1e1e; color: #d4d4d4; padding: 4px 2px; }
+QTreeWidget::item:hover { background-color: #2d2d30; }
+QTreeWidget::item:selected { background-color: #0e639c; color: #ffffff; }
+QTreeWidget::branch { background-color: #1e1e1e; }
+QSplitter::handle { background-color: #3e3e42; }
+QSplitter::handle:horizontal { width: 2px; }
+QTableWidget, QTableView { background-color: #1e1e1e; color: #d4d4d4; border: 1px solid #3e3e42; gridline-color: #3e3e42; }
+QTableWidget::item { color: #d4d4d4; padding: 2px; }
+QTableWidget::item:selected { background-color: #0e639c; color: #ffffff; }
+QHeaderView::section { background-color: #2d2d30; color: #d4d4d4; border: none; border-bottom: 1px solid #3e3e42; padding: 4px 6px; }
+QScrollArea { background-color: #1e1e1e; border: none; }
+QScrollArea > QWidget > QWidget { background-color: #1e1e1e; }
 )";
 
 static const char* kLightQss = R"(
@@ -92,6 +173,21 @@ QListWidget#navList { background-color: #f3f3f3; color: #333333; }
 QListWidget#navList::item { background-color: #f3f3f3; color: #333333; padding: 8px 6px; }
 QListWidget#navList::item:hover { background-color: #e0e0e0; }
 QListWidget#navList::item:selected { background-color: #0e639c; color: #ffffff; }
+QToolBar { background-color: #f3f3f3; border: none; spacing: 4px; }
+QToolBar QToolButton { background: transparent; color: #333333; padding: 4px 8px; border-radius: 3px; }
+QToolBar QToolButton:hover { background-color: #0e639c; color: #ffffff; }
+QTreeWidget { background-color: #f3f3f3; color: #333333; border: none; outline: none; }
+QTreeWidget::item { background-color: #f3f3f3; color: #333333; padding: 4px 2px; }
+QTreeWidget::item:hover { background-color: #e0e0e0; }
+QTreeWidget::item:selected { background-color: #0e639c; color: #ffffff; }
+QTreeWidget::branch { background-color: #f3f3f3; }
+QSplitter::handle { background-color: #c0c0c0; }
+QTableWidget, QTableView { background-color: #ffffff; color: #333333; border: 1px solid #c0c0c0; gridline-color: #d0d0d0; }
+QTableWidget::item { color: #333333; padding: 2px; }
+QTableWidget::item:selected { background-color: #0e639c; color: #ffffff; }
+QHeaderView::section { background-color: #e8e8e8; color: #333333; border: none; border-bottom: 1px solid #c0c0c0; padding: 4px 6px; }
+QScrollArea { background-color: #f3f3f3; border: none; }
+QScrollArea > QWidget > QWidget { background-color: #f3f3f3; }
 )";
 
 MainWindow::MainWindow(QWidget* parent)
@@ -121,6 +217,20 @@ MainWindow::MainWindow(QWidget* parent)
     connect(langBox_, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             &MainWindow::onLanguageChanged);
     LibraryManager::instance()->rescanAsync();
+
+    // ---- collection panels ----
+    connect(collectionTree_, &QTreeWidget::itemClicked, this, &MainWindow::onCollectionItemClicked);
+    connect(collectionTree_, &QTreeWidget::itemDoubleClicked, this, &MainWindow::onCollectionItemDoubleClicked);
+    connect(collectionTree_, &QWidget::customContextMenuRequested, this, &MainWindow::onCollectionContextMenu);
+    connect(collectionTree_, &CollectionTree::imagesDropped, this, &MainWindow::onImagesDropped);
+    connect(CollectionManager::instance(), &CollectionManager::collectionsChanged,
+            this, &MainWindow::reloadCollectionPanel);
+    connect(SmartCollectionManager::instance(), &SmartCollectionManager::smartCollectionsChanged,
+            this, &MainWindow::reloadCollectionPanel);
+    connect(saveSmartAct_, &QAction::triggered, this, &MainWindow::onSaveSmartCollection);
+    connect(exportAct_, &QAction::triggered, this, &MainWindow::onExportReport);
+    connect(batchAct_, &QAction::triggered, this, &MainWindow::onBatchEdit);
+    reloadCollectionPanel();
 
     // apply saved View settings
     SettingsManager* s = SettingsManager::instance();
@@ -216,6 +326,11 @@ void MainWindow::retranslateUi() {
     deleteBtn_->setToolTip(tr("Delete the selected images (disk files + cache)"));
     dslBox_->setTitle(tr("DSL Code (editable)"));
     dslEdit_->setPlaceholderText(tr("Generated DSL appears here; edit and click Search."));
+
+    if (saveSmartAct_) saveSmartAct_->setText("⭐ " + tr("Save as Smart Album"));
+    if (exportAct_) exportAct_->setText("📄 " + tr("Export Report"));
+    if (batchAct_) batchAct_->setText("✏️ " + tr("Batch Edit"));
+    if (collectionTitleLabel_) collectionTitleLabel_->setText("📁 " + tr("Albums"));
     refreshStats();
     refreshStatusBar();
 }
@@ -266,7 +381,7 @@ void MainWindow::buildUi() {
     sPageLay->addWidget(dslBox_);
 
     // results grid
-    resultGrid_ = new QListWidget(searchPage_);
+    resultGrid_ = new ImageGrid(searchPage_);
     resultGrid_->setViewMode(QListView::IconMode);
     resultGrid_->setResizeMode(QListView::Adjust);
     resultGrid_->setSelectionMode(QAbstractItemView::ExtendedSelection);  // multi-select
@@ -275,7 +390,11 @@ void MainWindow::buildUi() {
     resultGrid_->setGridSize(QSize(160, 170));
     resultGrid_->setWordWrap(false);
     resultGrid_->setMovement(QListView::Static);
+    resultGrid_->setDragEnabled(true);       // drag images onto albums
+    resultGrid_->setAcceptDrops(false);
+    resultGrid_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(resultGrid_, &QListWidget::itemDoubleClicked, this, &MainWindow::onResultDoubleClicked);
+    connect(resultGrid_, &QWidget::customContextMenuRequested, this, &MainWindow::onGridContextMenu);
     sPageLay->addWidget(resultGrid_, 1);
 
     // Construct LanguageManager before building the settings page so its panels
@@ -300,21 +419,425 @@ void MainWindow::buildUi() {
     statsLayout->addWidget(statCache_);
     statsLayout->addStretch();
 
+    // left: collection panel; right: stats + stacked pages
+    leftPanel_ = buildCollectionPanel();
+    QWidget* rightColumn = new QWidget(this);
+    QVBoxLayout* rightLay = new QVBoxLayout(rightColumn);
+    rightLay->setContentsMargins(0, 0, 0, 0);
+    rightLay->setSpacing(0);
+    rightLay->addWidget(statsBar);
+    rightLay->addWidget(stack_, 1);
+
+    mainSplitter_ = new QSplitter(Qt::Horizontal, this);
+    mainSplitter_->addWidget(leftPanel_);
+    mainSplitter_->addWidget(rightColumn);
+    mainSplitter_->setStretchFactor(0, 0);
+    mainSplitter_->setStretchFactor(1, 1);
+    mainSplitter_->setSizes({230, 900});
+    mainSplitter_->setCollapsible(0, false);
+
     QWidget* central = new QWidget(this);
     QVBoxLayout* mainLay = new QVBoxLayout(central);
     mainLay->setContentsMargins(0, 0, 0, 0);
     mainLay->setSpacing(0);
-    mainLay->addWidget(statsBar);
-    mainLay->addWidget(stack_, 1);
+    mainLay->addWidget(mainSplitter_, 1);
     setCentralWidget(central);
+
+    // ---- top toolbar: report / export / batch ----
+    QToolBar* toolbar = addToolBar(tr("Actions"));
+    toolbar->setMovable(false);
+    toolbar->setFloatable(false);
+    toolbar->setIconSize(QSize(16, 16));
+    saveSmartAct_ = toolbar->addAction("⭐ " + tr("Save as Smart Album"));
+    exportAct_ = toolbar->addAction("📄 " + tr("Export Report"));
+    batchAct_ = toolbar->addAction("✏️ " + tr("Batch Edit"));
 
     statusBar()->addWidget(new QLabel(" ", this), 1);
     statusBar()->showMessage(tr("Ready"));
-    resize(1120, 720);
+    resize(1200, 760);
 
     connect(translateBtn_, &QPushButton::clicked, this, &MainWindow::onTranslateClicked);
     connect(execBtn_, &QPushButton::clicked, this, &MainWindow::onExecuteClicked);
     connect(searchEdit_, &QLineEdit::returnPressed, this, &MainWindow::onTranslateClicked);
+}
+
+QWidget* MainWindow::buildCollectionPanel() {
+    QWidget* panel = new QWidget(this);
+    panel->setMinimumWidth(180);
+    QVBoxLayout* vl = new QVBoxLayout(panel);
+    vl->setContentsMargins(6, 6, 6, 6);
+    vl->setSpacing(4);
+
+    QHBoxLayout* head = new QHBoxLayout();
+    collectionTitleLabel_ = new QLabel("📁 " + tr("Albums"), panel);
+    collectionTitleLabel_->setStyleSheet("font-weight:bold;");
+    QPushButton* newBtn = new QPushButton("＋", panel);
+    newBtn->setToolTip(tr("New album"));
+    newBtn->setFixedWidth(26);
+    head->addWidget(collectionTitleLabel_);
+    head->addStretch();
+    head->addWidget(newBtn);
+    vl->addLayout(head);
+
+    collectionTree_ = new CollectionTree(panel);
+    collectionTree_->setHeaderHidden(true);
+    collectionTree_->setIndentation(16);
+    collectionTree_->setSelectionMode(QAbstractItemView::SingleSelection);
+    collectionTree_->setContextMenuPolicy(Qt::CustomContextMenu);
+    collectionTree_->setAcceptDrops(true);
+    collectionTree_->setDragEnabled(false);
+    vl->addWidget(collectionTree_, 1);
+
+    connect(newBtn, &QPushButton::clicked, this, &MainWindow::onNewCollection);
+    return panel;
+}
+
+// Rebuild the left panel's tree: two branches (normal albums + smart albums).
+void MainWindow::reloadCollectionPanel() {
+    collectionTree_->blockSignals(true);
+    collectionTree_->clear();
+
+    QTreeWidgetItem* albumBranch = new QTreeWidgetItem(collectionTree_);
+    albumBranch->setText(0, "📁 " + tr("Albums"));
+    albumBranch->setData(0, Qt::UserRole, "branch");
+    QTreeWidgetItem* smartBranch = new QTreeWidgetItem(collectionTree_);
+    smartBranch->setText(0, "🔍 " + tr("Smart Albums"));
+    smartBranch->setData(0, Qt::UserRole, "branch");
+
+    const QStringList names = CollectionManager::instance()->names();
+    for (const QString& n : names) {
+        QTreeWidgetItem* it = new QTreeWidgetItem(albumBranch);
+        it->setText(0, "📁 " + n);
+        it->setData(0, Qt::UserRole, "normal");
+        it->setData(0, Qt::UserRole + 1, n);
+        it->setToolTip(0, tr("%1 images").arg(CollectionManager::instance()->imagesIn(n).size()));
+    }
+    const QStringList smart = SmartCollectionManager::instance()->names();
+    for (const QString& n : smart) {
+        QTreeWidgetItem* it = new QTreeWidgetItem(smartBranch);
+        it->setText(0, "🔍 " + n);
+        it->setData(0, Qt::UserRole, "smart");
+        it->setData(0, Qt::UserRole + 1, n);
+    }
+    albumBranch->setExpanded(true);
+    smartBranch->setExpanded(true);
+
+    // ---- clustering packs (V2): one branch per active pack with data ----
+    ExtensionManager::instance()->scan();
+    const QList<ExtPack> packs = ExtensionManager::instance()->packs();
+    for (const ExtPack& p : packs) {
+        if (!p.active || !p.canCluster || !p.showInSidebar || p.clusterName.isEmpty()) continue;
+        QHash<QString, QStringList> imgMap = CollectionManager::clusterImages(p.clusterName);
+        if (imgMap.isEmpty()) continue;
+
+        QString title = p.icon.isEmpty() ? p.groupLabel : p.icon + " " + p.groupLabel;
+        QTreeWidgetItem* clusterBranch = new QTreeWidgetItem(collectionTree_);
+        clusterBranch->setText(0, title);
+        clusterBranch->setData(0, Qt::UserRole, "branch");
+
+        // Sort clusters by image count (descending), then by id.
+        QList<QPair<int, QString>> order;
+        for (auto it = imgMap.begin(); it != imgMap.end(); ++it) order.append({it.value().size(), it.key()});
+        std::sort(order.begin(), order.end(), [](const QPair<int, QString>& a, const QPair<int, QString>& b) {
+            if (a.first != b.first) return a.first > b.first;
+            return a.second < b.second;
+        });
+        for (const auto& pr : order) {
+            const QString clusterId = pr.second;
+            QString display = ClusterNameMapping::instance()->displayName(clusterId, p.clusterName);
+            QTreeWidgetItem* it = new QTreeWidgetItem(clusterBranch);
+            it->setText(0, QString("%1 (%2)").arg(display).arg(pr.first));
+            it->setData(0, Qt::UserRole, "cluster");
+            it->setData(0, Qt::UserRole + 1, clusterId);
+            it->setData(0, Qt::UserRole + 2, p.clusterName);
+        }
+        clusterBranch->setExpanded(true);
+    }
+
+    collectionTree_->blockSignals(false);
+}
+
+QStringList MainWindow::selectedGridPaths() const {
+    QStringList paths;
+    for (QListWidgetItem* it : resultGrid_->selectedItems()) {
+        const QString p = it->data(Qt::UserRole).toString();
+        if (!p.isEmpty()) paths << p;
+    }
+    return paths;
+}
+
+void MainWindow::openCollection(const QString& name) {
+    currentCollectionName_ = name;
+    QString escaped = name;
+    escaped.replace('\\', "\\\\").replace('"', "\\\"");
+    executeDsl(QString("collection(\"%1\")").arg(escaped));
+}
+
+void MainWindow::onCollectionItemClicked(QTreeWidgetItem* item, int) {
+    if (!item) return;
+    const QString type = item->data(0, Qt::UserRole).toString();
+    if (type == "normal") {
+        openCollection(item->data(0, Qt::UserRole + 1).toString());
+    } else if (type == "cluster") {
+        showClusterImages(item->data(0, Qt::UserRole + 2).toString(),
+                          item->data(0, Qt::UserRole + 1).toString());
+    }
+}
+
+void MainWindow::onCollectionItemDoubleClicked(QTreeWidgetItem* item, int) {
+    if (!item) return;
+    const QString type = item->data(0, Qt::UserRole).toString();
+    if (type == "smart") {
+        const QString name = item->data(0, Qt::UserRole + 1).toString();
+        currentCollectionName_.clear();   // a smart-album run is not a collection browse
+        executeDsl(SmartCollectionManager::instance()->dslFor(name));
+    } else if (type == "cluster") {
+        onRenameCluster(item);
+    }
+}
+
+void MainWindow::onRenameCluster(QTreeWidgetItem* item) {
+    if (!item) return;
+    const QString clusterId = item->data(0, Qt::UserRole + 1).toString();
+    const QString clusterName = item->data(0, Qt::UserRole + 2).toString();
+    bool ok = false;
+    QString name = QInputDialog::getText(this, tr("Rename Group"),
+                                         tr("Display name for this group:"), QLineEdit::Normal,
+                                         ClusterNameMapping::instance()->displayName(clusterId, clusterName), &ok);
+    if (!ok) return;
+    ClusterNameMapping::instance()->setMapping(clusterId, name.trimmed());
+    reloadCollectionPanel();
+}
+
+// Show every photo whose cluster_groups[clusterName] contains clusterId by
+// synthesizing the same result JSON the engine emits (reuses the grid pipeline).
+void MainWindow::showClusterImages(const QString& clusterName, const QString& clusterId) {
+    currentCollectionName_.clear();
+    const QHash<QString, QStringList> imgMap = CollectionManager::clusterImages(clusterName);
+    const QStringList paths = imgMap.value(clusterId);
+
+    QJsonObject obj;
+    obj["type"] = "images";
+    const QStringList dirs = LibraryManager::instance()->paths();
+    obj["photo_dir"] = dirs.isEmpty() ? QString() : dirs.first();
+    QJsonArray roots;
+    for (const QString& d : dirs) {
+        roots.append(QJsonObject{{"prefix", QDir(d).dirName()}, {"dir", d}});
+    }
+    obj["photo_roots"] = roots;
+    QJsonArray results;
+    for (const QString& p : paths) {
+        results.append(QJsonObject{{"path", p}, {"score", 1.0}});
+    }
+    obj["results"] = results;
+    showResults(obj);
+    statusBar()->showMessage(tr("Group \"%1\": %2 photo(s)")
+                                 .arg(ClusterNameMapping::instance()->displayName(clusterId, clusterName))
+                                 .arg(paths.size()));
+}
+
+void MainWindow::onCollectionContextMenu(const QPoint& pos) {
+    QTreeWidgetItem* item = collectionTree_->itemAt(pos);
+    const QString type = item ? item->data(0, Qt::UserRole).toString() : QString();
+
+    QMenu menu(this);
+    QAction* newAct = menu.addAction(tr("New Album..."));
+    QAction* renameAct = nullptr;
+    QAction* delAct = nullptr;
+    if (type == "normal" || type == "smart") {
+        renameAct = menu.addAction(tr("Rename..."));
+        delAct = menu.addAction(tr("Delete"));
+    } else if (type == "cluster") {
+        renameAct = menu.addAction(tr("Rename..."));
+    }
+    QAction* chosen = menu.exec(collectionTree_->viewport()->mapToGlobal(pos));
+    if (chosen == newAct) {
+        onNewCollection();
+    } else if (chosen == renameAct) {
+        if (type == "cluster") onRenameCluster(item);
+        else onRenameCollection(item);
+    } else if (chosen == delAct) {
+        onDeleteCollection(item);
+    }
+}
+
+void MainWindow::onNewCollection() {
+    bool ok = false;
+    QString name = QInputDialog::getText(this, tr("New Album"), tr("Album name:"),
+                                         QLineEdit::Normal, QString(), &ok);
+    if (!ok) return;
+    name = name.trimmed();
+    if (name.isEmpty()) return;
+    if (!CollectionManager::instance()->create(name)) {
+        statusBar()->showMessage(tr("Album \"%1\" already exists or could not be created.").arg(name));
+        return;
+    }
+    statusBar()->showMessage(tr("Created album \"%1\".").arg(name));
+    reloadCollectionPanel();
+}
+
+void MainWindow::onRenameCollection(QTreeWidgetItem* item) {
+    if (!item) return;
+    const QString type = item->data(0, Qt::UserRole).toString();
+    const QString oldName = item->data(0, Qt::UserRole + 1).toString();
+    bool ok = false;
+    QString name = QInputDialog::getText(this, tr("Rename"), tr("New name:"),
+                                         QLineEdit::Normal, oldName, &ok);
+    if (!ok) return;
+    name = name.trimmed();
+    if (name.isEmpty() || name == oldName) return;
+    bool renamed = (type == "smart")
+                       ? SmartCollectionManager::instance()->rename(oldName, name)
+                       : CollectionManager::instance()->rename(oldName, name);
+    if (!renamed) {
+        statusBar()->showMessage(tr("Rename failed (name may already be in use)."));
+    } else {
+        if (type == "normal" && currentCollectionName_ == oldName) currentCollectionName_ = name;
+        statusBar()->showMessage(tr("Renamed to \"%1\".").arg(name));
+    }
+    reloadCollectionPanel();
+}
+
+void MainWindow::onDeleteCollection(QTreeWidgetItem* item) {
+    if (!item) return;
+    const QString type = item->data(0, Qt::UserRole).toString();
+    const QString name = item->data(0, Qt::UserRole + 1).toString();
+    auto r = QMessageBox::warning(this, tr("Delete Album"),
+                                  tr("Delete album \"%1\"? (images on disk are kept)").arg(name),
+                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if (r != QMessageBox::Yes) return;
+    bool removed = (type == "smart")
+                       ? SmartCollectionManager::instance()->remove(name)
+                       : CollectionManager::instance()->remove(name);
+    if (removed && currentCollectionName_ == name) currentCollectionName_.clear();
+    reloadCollectionPanel();
+}
+
+void MainWindow::onAddToCollection(const QString& name) {
+    QStringList paths = selectedGridPaths();
+    if (paths.isEmpty()) {
+        if (QListWidgetItem* it = resultGrid_->currentItem())
+            paths << it->data(Qt::UserRole).toString();
+    }
+    if (paths.isEmpty()) {
+        statusBar()->showMessage(tr("No image selected."));
+        return;
+    }
+    if (CollectionManager::instance()->addImages(name, paths)) {
+        statusBar()->showMessage(tr("Added %1 image(s) to \"%2\".").arg(paths.size()).arg(name));
+        reloadCollectionPanel();
+    }
+}
+
+void MainWindow::onRemoveFromCollection() {
+    if (currentCollectionName_.isEmpty()) return;
+    const QStringList paths = selectedGridPaths();
+    if (paths.isEmpty()) {
+        statusBar()->showMessage(tr("No image selected."));
+        return;
+    }
+    int n = 0;
+    for (const QString& p : paths) {
+        if (CollectionManager::instance()->removeImage(currentCollectionName_, p)) ++n;
+    }
+    statusBar()->showMessage(tr("Removed %1 image(s) from \"%2\".").arg(n).arg(currentCollectionName_));
+    reloadCollectionPanel();
+}
+
+void MainWindow::onImagesDropped(const QString& collection, const QStringList& paths) {
+    if (CollectionManager::instance()->addImages(collection, paths)) {
+        statusBar()->showMessage(tr("Added %1 image(s) to \"%2\".").arg(paths.size()).arg(collection));
+        reloadCollectionPanel();
+    }
+}
+
+void MainWindow::onSaveSmartCollection() {
+    const QString dsl = dslEdit_->toPlainText().trimmed();
+    if (dsl.isEmpty()) {
+        statusBar()->showMessage(tr("DSL is empty - nothing to save."));
+        return;
+    }
+    bool ok = false;
+    QString name = QInputDialog::getText(this, tr("Save as Smart Album"),
+                                         tr("Smart album name:"), QLineEdit::Normal, QString(), &ok);
+    if (!ok) return;
+    name = name.trimmed();
+    if (name.isEmpty()) return;
+    if (SmartCollectionManager::instance()->save(name, dsl)) {
+        statusBar()->showMessage(tr("Saved smart album \"%1\".").arg(name));
+        reloadCollectionPanel();
+    }
+}
+
+void MainWindow::onExportReport() {
+    QVector<ExportImage> all;
+    QSet<QString> selectedPaths;
+    for (QListWidgetItem* it : resultGrid_->selectedItems()) {
+        selectedPaths.insert(it->data(Qt::UserRole).toString());
+    }
+    for (const ResultItem& it : pending_) {
+        if (it.score < 0.05) continue;   // only exported items are the visible ones
+        all.append({it.path, it.fullPath, it.score});
+    }
+    QVector<ExportImage> selected;
+    for (const ResultItem& it : pending_) {
+        if (it.score < 0.05) continue;
+        if (selectedPaths.contains(it.path)) selected.append({it.path, it.fullPath, it.score});
+    }
+    ExportReportDialog dlg(all, selected, this);
+    dlg.exec();
+}
+
+void MainWindow::onBatchEdit() {
+    QSet<QString> selectedPaths;
+    for (QListWidgetItem* it : resultGrid_->selectedItems()) {
+        selectedPaths.insert(it->data(Qt::UserRole).toString());
+    }
+    if (selectedPaths.isEmpty()) {
+        statusBar()->showMessage(tr("No image selected."));
+        return;
+    }
+    QVector<BatchImage> images;
+    for (const ResultItem& it : pending_) {
+        if (it.score < 0.05) continue;
+        if (selectedPaths.contains(it.path)) images.append({it.path, it.fullPath, it.score});
+    }
+    if (images.isEmpty()) return;
+    BatchEditDialog dlg(images, this);
+    dlg.exec();
+    if (dlg.changed()) {
+        // Re-run the current query so the grid reflects renames / tag edits.
+        if (!currentCollectionName_.isEmpty()) {
+            openCollection(currentCollectionName_);
+        } else if (!dslEdit_->toPlainText().trimmed().isEmpty()) {
+            executeDsl(dslEdit_->toPlainText());
+        }
+    }
+}
+
+void MainWindow::onGridContextMenu(const QPoint& pos) {
+    QListWidgetItem* item = resultGrid_->itemAt(pos);
+    if (!item) return;
+
+    QMenu menu(this);
+    QMenu* addSub = menu.addMenu(tr("Add to Album"));
+    const QStringList names = CollectionManager::instance()->names();
+    if (names.isEmpty()) {
+        QAction* none = addSub->addAction(tr("(no albums - create one)"));
+        none->setEnabled(false);
+    }
+    for (const QString& n : names) {
+        QAction* act = addSub->addAction("📁 " + n);
+        connect(act, &QAction::triggered, this, [this, n]() { onAddToCollection(n); });
+    }
+    if (!currentCollectionName_.isEmpty()) {
+        QAction* rem = menu.addAction(tr("Remove from Album"));
+        connect(rem, &QAction::triggered, this, &MainWindow::onRemoveFromCollection);
+    }
+    menu.addSeparator();
+    QAction* details = menu.addAction(tr("Details"));
+    connect(details, &QAction::triggered, this, [this, item]() { onResultDoubleClicked(item); });
+    menu.exec(resultGrid_->viewport()->mapToGlobal(pos));
 }
 
 QLabel* MainWindow::createStatLabel(const QString& text) {
@@ -325,6 +848,41 @@ QLabel* MainWindow::createStatLabel(const QString& text) {
 }
 
 void MainWindow::applyTheme(bool dark) {
+    // Set a matching QPalette so every widget NOT explicitly styled by the QSS
+    // (tree view, tables, toolbar buttons, dialog bits, scrollbars...) follows
+    // the theme too: dark mode -> light text, light mode -> dark text.
+    QPalette pal;
+    if (dark) {
+        pal.setColor(QPalette::Window, QColor(0x1e, 0x1e, 0x1e));
+        pal.setColor(QPalette::WindowText, QColor(0xcc, 0xcc, 0xcc));
+        pal.setColor(QPalette::Base, QColor(0x2d, 0x2d, 0x30));
+        pal.setColor(QPalette::AlternateBase, QColor(0x25, 0x25, 0x26));
+        pal.setColor(QPalette::Text, QColor(0xd4, 0xd4, 0xd4));
+        pal.setColor(QPalette::Button, QColor(0x2d, 0x2d, 0x30));
+        pal.setColor(QPalette::ButtonText, QColor(0xcc, 0xcc, 0xcc));
+        pal.setColor(QPalette::BrightText, Qt::red);
+        pal.setColor(QPalette::Link, QColor(0x4e, 0xc9, 0xb0));
+        pal.setColor(QPalette::Highlight, QColor(0x0e, 0x63, 0x9c));
+        pal.setColor(QPalette::HighlightedText, Qt::white);
+        pal.setColor(QPalette::PlaceholderText, QColor(0x8a, 0x8a, 0x8a));
+        pal.setColor(QPalette::ToolTipBase, QColor(0x25, 0x25, 0x26));
+        pal.setColor(QPalette::ToolTipText, QColor(0xcc, 0xcc, 0xcc));
+    } else {
+        pal.setColor(QPalette::Window, QColor(0xf3, 0xf3, 0xf3));
+        pal.setColor(QPalette::WindowText, QColor(0x33, 0x33, 0x33));
+        pal.setColor(QPalette::Base, Qt::white);
+        pal.setColor(QPalette::AlternateBase, QColor(0xf0, 0xf0, 0xf0));
+        pal.setColor(QPalette::Text, QColor(0x33, 0x33, 0x33));
+        pal.setColor(QPalette::Button, QColor(0xe8, 0xe8, 0xe8));
+        pal.setColor(QPalette::ButtonText, QColor(0x33, 0x33, 0x33));
+        pal.setColor(QPalette::Link, QColor(0x0e, 0x63, 0x9c));
+        pal.setColor(QPalette::Highlight, QColor(0x0e, 0x63, 0x9c));
+        pal.setColor(QPalette::HighlightedText, Qt::white);
+        pal.setColor(QPalette::PlaceholderText, QColor(0x80, 0x80, 0x80));
+        pal.setColor(QPalette::ToolTipBase, Qt::white);
+        pal.setColor(QPalette::ToolTipText, QColor(0x33, 0x33, 0x33));
+    }
+    qApp->setPalette(pal);
     qApp->setStyleSheet(QString::fromUtf8(dark ? kDarkQss : kLightQss));
     SettingsManager::instance()->setDarkMode(dark);
 }
@@ -486,11 +1044,18 @@ void MainWindow::onLlmError(const QString& msg) {
 }
 
 void MainWindow::onExecuteClicked() {
-    QString dsl = dslEdit_->toPlainText();
+    const QString dsl = dslEdit_->toPlainText();
     if (dsl.trimmed().isEmpty()) {
         statusBar()->showMessage(tr("DSL is empty - translate or type it first"));
         return;
     }
+    currentCollectionName_.clear();   // a manual search is not a collection browse
+    executeDsl(dsl);
+}
+
+// Launch the engine with the given DSL and stream results into the grid.  Used
+// by the Search button, album browsing and smart-collection execution alike.
+void MainWindow::executeDsl(const QString& dsl) {
     // Safety: the DSL may contain a `del` statement that permanently deletes
     // image files — confirm with the user first.
     QRegularExpression delRe(R"(\bdel\b)");
@@ -520,6 +1085,7 @@ void MainWindow::onExecuteClicked() {
         }
     }
 
+    dslEdit_->setPlainText(dsl);   // reflect what is being executed
     resultGrid_->clear();
     pending_.clear();
     thumbPos_ = 0;
@@ -559,6 +1125,7 @@ void MainWindow::onEngineFinished(int, QProcess::ExitStatus) {
         else        qInfo() << "[Preprocess] cache already up to date";
         refreshStats();
         refreshStatusBar();
+        if (rebuilt) reloadCollectionPanel();   // cluster groups may have appeared
         return;
     }
 
@@ -572,6 +1139,7 @@ void MainWindow::onEngineFinished(int, QProcess::ExitStatus) {
         statusBar()->showMessage(tr("Engine output is not valid JSON"));
         return;
     }
+    if (rebuilt) reloadCollectionPanel();   // cluster groups may have appeared
     showResults(doc.object());
 }
 

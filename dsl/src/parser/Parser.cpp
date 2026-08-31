@@ -339,6 +339,16 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             }
             error("Expected a class name inside cnt(...)");
         }
+        // collection("name") : named image set (virtual album).
+        if (t.text == "collection" && peek().type == TokenKind::LParen) {
+            consume(TokenKind::LParen);
+            Token nameTok = consume();
+            if (nameTok.type != TokenKind::String) {
+                error("Expected a string collection name inside collection(...)");
+            }
+            consume(TokenKind::RParen);
+            return std::make_unique<CollectionExpr>(nameTok.text);
+        }
         // macro call: name(arg1, arg2, ...)
         if (peek().type == TokenKind::LParen) {
             consume(TokenKind::LParen);

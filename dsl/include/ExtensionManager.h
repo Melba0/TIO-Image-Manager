@@ -13,6 +13,7 @@ class OnnxInference;
 // Configuration of a single extension pack (extensions/<name>/config.json).
 struct ExtensionPack {
     std::string name;
+    std::string pack_dir;                        // absolute folder containing config.json
     std::string parent_class;                  // expand objects whose class matches this
     std::vector<std::string> children;         // classes the extension model can output
     std::string model_path;                    // path to the .onnx (relative to project root)
@@ -20,6 +21,21 @@ struct ExtensionPack {
     float conf_threshold = 0.3f;               // min confidence for a child detection
     float crop_padding = 0.1f;                 // fraction of the parent bbox to pad
     bool is_classifier = false;                // false -> detection (4+nc rows per anchor)
+    std::string input_normalize;               // ""/"none" = raw 0..1; "imagenet" = (x-mean)/std
+
+    // ---- capabilities (V2: clustering / embedding packs) ----
+    bool can_extract_embedding = false;        // model outputs a fixed-size embedding
+    std::string embedding_name;                // key under which the embedding is stored
+    bool can_cluster = false;                  // this pack drives a clustering pass
+    std::string cluster_name;                  // clustering label (e.g. "face_cluster")
+    float cluster_threshold = 0.55f;           // cosine similarity threshold (0..1)
+
+    // ---- GUI presentation ----
+    std::string gui_group_label;               // sidebar branch title (e.g. "人物")
+    bool gui_show_in_sidebar = true;
+    std::string gui_icon;                      // optional leading emoji (e.g. "👤")
+
+    bool isClusterPack() const { return can_cluster; }
 };
 
 // Scans extensions/ for packs, lazily loads their .onnx models and performs the
@@ -54,6 +70,16 @@ public:
     // Throws std::runtime_error if the extension is not registered/active.
     std::vector<DetectedObject> expand(const std::vector<DetectedObject>& parents,
                                        const std::string& ext_name);
+
+    // ---- clustering support (V2) ----
+    // Active packs that declare capabilities.can_cluster (stable pointers).
+    std::vector<const ExtensionPack*> clusterPacks() const;
+    // Extract the L2-normalized embedding of one object via the pack's model
+    // (crop the padded region, run the network, flatten the output vector).
+    // Returns an empty vector when the model is missing / inference fails.
+    std::vector<float> extractEmbedding(const std::string& img_path,
+                                        const DetectedObject& obj,
+                                        const std::string& ext_name);
 
 private:
     std::vector<std::string> extension_dirs_;

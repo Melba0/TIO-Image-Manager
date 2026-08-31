@@ -55,6 +55,7 @@ void ExtensionManager::scan() {
 
                 ExtensionPack pack;
                 pack.name = j.value("name", entry.path().filename().string());
+                pack.pack_dir = entry.path().string();
                 if (seen.count(pack.name)) continue;  // first directory wins
                 pack.parent_class = j.value("parent_class", "");
                 for (const auto& c : j.value("children", json::array())) {
@@ -65,6 +66,23 @@ void ExtensionManager::scan() {
                 pack.conf_threshold = j.value("conf_threshold", 0.3f);
                 pack.crop_padding = j.value("crop_padding", 0.1f);
                 pack.is_classifier = j.value("is_classifier", false);
+                pack.input_normalize = j.value("input_normalize", "");
+
+                // ---- V2 clustering / embedding capability ----
+                if (j.contains("capabilities") && j["capabilities"].is_object()) {
+                    const auto& cap = j["capabilities"];
+                    pack.can_extract_embedding = cap.value("can_extract_embedding", false);
+                    pack.embedding_name = cap.value("embedding_name", "");
+                    pack.can_cluster = cap.value("can_cluster", false);
+                    pack.cluster_name = cap.value("cluster_name", "");
+                    pack.cluster_threshold = cap.value("cluster_threshold", 0.55f);
+                }
+                if (j.contains("gui") && j["gui"].is_object()) {
+                    const auto& g = j["gui"];
+                    pack.gui_group_label = g.value("group_label", "");
+                    pack.gui_show_in_sidebar = g.value("show_in_sidebar", true);
+                    pack.gui_icon = g.value("icon", "");
+                }
 
                 if (pack.model_path.empty()) continue;
 
@@ -113,12 +131,11 @@ std::shared_ptr<OnnxInference> ExtensionManager::loadModel(const std::string& ex
     const ExtensionPack* pack = getExtension(ext_name);
     if (!pack) return nullptr;
 
-    // Resolve model path relative to the project root (parent of the first
-    // extension directory, e.g. <project>/models/extensions -> <project>).
+    // Resolve the model path relative to the pack's own folder (the pack is a
+    // self-contained directory; model_path like "model.onnx" is the norm).
     std::string model_path = pack->model_path;
-    if (!fs::path(model_path).is_absolute() && !extension_dirs_.empty()) {
-        auto base = fs::path(extension_dirs_[0]).parent_path();
-        model_path = (base / model_path).string();
+    if (!fs::path(model_path).is_absolute() && !pack->pack_dir.empty()) {
+        model_path = (fs::path(pack->pack_dir) / model_path).string();
     }
 
     auto module = std::make_shared<OnnxInference>(pack->input_size, 4);
@@ -323,6 +340,14 @@ std::vector<DetectedObject> ExtensionManager::expand(const std::vector<DetectedO
         throw std::runtime_error("Extension \"" + ext_name + "\" model could not be loaded.");
     }
 
+    // Embedding / clustering packs do not produce child detections: the model
+    // outputs a feature vector and the cache pipeline already attached
+    // embeddings + cluster_ids to every matching cached object.  `>>` on such a
+    // pack therefore acts as identity (keeps the parent objects).
+    if (pack->can_cluster || pack->can_extract_embedding) {
+        return parents;
+    }
+
     for (const auto& parent : parents) {
         // Only expand objects belonging to the pack's parent class.
         if (parent.class_name != pack->parent_class && parent.super_class != pack->parent_class) {
@@ -354,4 +379,63 @@ std::vector<DetectedObject> ExtensionManager::expand(const std::vector<DetectedO
     }
 
     return result;
+}
+
+std::vector<const ExtensionPack*> ExtensionManager::clusterPacks() const {
+    std::vector<const ExtensionPack*> out;
+    for (const auto& pack : packs_) {
+        if (pack.isClusterPack() && active_.count(pack.name)) out.push_back(&pack);
+    }
+    return out;
+}
+
+std::vector<float> ExtensionManager::extractEmbedding(const std::string& img_path,
+                                                      const DetectedObject& obj,
+                                                      const std::string& ext_name) {
+    const ExtensionPack* pack = getExtension(ext_name);
+    if (!pack || !pack->can_extract_embedding) return {};
+
+    auto model = loadModel(ext_name);
+    if (!model) return {};
+
+    double cx = 0, cy = 0, cw = 0, ch = 0;
+    std::vector<float> input = cropRegion(img_path, obj, pack->input_size, pack->crop_padding,
+                                          cx, cy, cw, ch);
+    if (input.empty()) return {};
+
+    // Optional input normalization (the face model was trained on ImageNet
+    // statistics; raw 0..1 crops would collapse the embedding space).
+    if (pack->input_normalize == "imagenet") {
+        static const float mean[3] = {0.485f, 0.456f, 0.406f};
+        static const float std[3] = {0.229f, 0.224f, 0.225f};
+        const int side = pack->input_size;
+        for (int c = 0; c < 3; ++c) {
+            float* ch_ = input.data() + (size_t)c * side * side;
+            for (int i = 0; i < side * side; ++i) {
+                ch_[i] = (ch_[i] - mean[c]) / std[c];
+            }
+        }
+    }
+
+    InferenceTensor preds = model->run(input.data(), input.size());
+    if (!preds.defined()) return {};
+
+    // Flatten the output into a single vector.  Accept [1, D] and [D] layouts.
+    std::vector<float> emb;
+    if (preds.dim() == 1) {
+        emb = preds.data;
+    } else if (preds.dim() == 2 && preds.shape[0] == 1) {
+        emb = preds.data;
+    } else {
+        return {};
+    }
+    if (emb.size() < 8) return {};
+
+    // L2-normalize (face-embedding convention: cosine similarity = dot product).
+    double norm = 0.0;
+    for (float v : emb) norm += (double)v * v;
+    norm = std::sqrt(norm);
+    if (norm <= 1e-12) return {};
+    for (float& v : emb) v = (float)(v / norm);
+    return emb;
 }

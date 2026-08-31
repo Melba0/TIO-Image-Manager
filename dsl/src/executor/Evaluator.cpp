@@ -46,6 +46,7 @@ Value Evaluator::evaluateExpr(const Expr& expr) {
     if (auto* s = dynamic_cast<const StringExpr*>(&expr)) return evalString(*s);
     if (auto* id = dynamic_cast<const IdentExpr*>(&expr)) return evalIdent(*id);
     if (auto* d = dynamic_cast<const DollarExpr*>(&expr)) return evalDollar(*d);
+    if (auto* c = dynamic_cast<const CollectionExpr*>(&expr)) return evalCollection(*c);
     if (auto* b = dynamic_cast<const BinaryExpr*>(&expr)) return evalBinary(*b);
     if (auto* u = dynamic_cast<const UnaryExpr*>(&expr)) return evalUnary(*u);
     if (auto* c = dynamic_cast<const CaretExpr*>(&expr)) return evalCaret(*c);
@@ -170,6 +171,12 @@ Value Evaluator::evalDollar(const DollarExpr&) {
     }
     // Otherwise return all images (neutral score 1.0)
     return Value::makeImageSet(ctx_.getAllImagePaths());
+}
+
+Value Evaluator::evalCollection(const CollectionExpr& node) {
+    // `collection("name")` : the image set of a user-created virtual album.
+    // Independent of the tag pre-filter (`$` may still be intersected with it).
+    return Value::makeImageSet(ctx_.getCollection(node.name));
 }
 
 Value Evaluator::evalCaret(const CaretExpr& node) {
@@ -692,6 +699,10 @@ Value Evaluator::evalMacroCall(const MacroCallExpr& node) {
         return evalSceneMacro(node, m);
     }
 
+    if (m->is_cluster) {
+        return evalClusterMacro(node, m);
+    }
+
     // AST macro (built-in object macro or user macro)
     if (node.args.size() != m->params.size()) {
         throw std::runtime_error("Macro '" + node.name + "' expects " +
@@ -1201,4 +1212,65 @@ Value Evaluator::evalSceneMacro(const MacroCallExpr& node, const MacroDef* m) {
             return score(ia ? ia->indoor_score : 0.0f);
     }
     return Value::makeScore(0.0f);
+}
+
+// ---- clustering macros (read the object's cached cluster_ids) ----
+// cluster_id(obj, cluster_name) -> string; cluster_sim(a, b, cluster_name) -> bool.
+Value Evaluator::evalClusterMacro(const MacroCallExpr& node, const MacroDef* m) {
+    // Resolve an object argument to a Value (never a dangling pointer):
+    // an explicit OBJECT value, the current object (`obj`), or a bare class
+    // name (best object of that class).
+    auto objValue = [&](size_t i) -> Value {
+        if (i < node.args.size()) {
+            if (auto* co = dynamic_cast<const CurrentObjectExpr*>(node.args[i].get())) {
+                const DetectedObject* o = ctx_.getCurrentObject();
+                return o ? Value::makeObject(*o) : Value::makeNone();
+            }
+            if (auto* id = dynamic_cast<const IdentExpr*>(node.args[i].get())) {
+                ModelRegistry* reg = ctx_.getRegistry();
+                if (reg && reg->hasClass(id->name)) {
+                    if (const DetectedObject* best = bestClassObject(id->name)) {
+                        return Value::makeObject(*best);
+                    }
+                }
+            }
+            return evaluateExpr(*node.args[i]);
+        }
+        const DetectedObject* o = ctx_.getCurrentObject();
+        return o ? Value::makeObject(*o) : Value::makeNone();
+    };
+    auto nameArg = [&](size_t i) -> std::string {
+        Value v = evaluateExpr(*node.args[i]);
+        if (v.type != Value::STRING) {
+            throw std::runtime_error(node.name + "() expects a string cluster name");
+        }
+        return v.str_val;
+    };
+
+    if (m->cluster_fn == ClusterFn::ClusterId) {
+        if (node.args.size() != 2) {
+            throw std::runtime_error("cluster_id() expects (obj, cluster_name)");
+        }
+        Value o = objValue(0);
+        if (o.type != Value::OBJECT) {
+            throw std::runtime_error("cluster_id() needs an object context");
+        }
+        const std::string name = nameArg(1);
+        auto it = o.object.cluster_ids.find(name);
+        return Value::makeString(it != o.object.cluster_ids.end() ? it->second : "");
+    }
+
+    // ClusterSim
+    if (node.args.size() != 3) {
+        throw std::runtime_error("cluster_sim() expects (a, b, cluster_name)");
+    }
+    Value a = objValue(0);
+    Value b = objValue(1);
+    if (a.type != Value::OBJECT || b.type != Value::OBJECT) return Value::makeScore(0.0f);
+    const std::string name = nameArg(2);
+    auto ia = a.object.cluster_ids.find(name);
+    auto ib = b.object.cluster_ids.find(name);
+    bool same = ia != a.object.cluster_ids.end() && ib != b.object.cluster_ids.end() &&
+                !ia->second.empty() && ia->second == ib->second;
+    return Value::makeScore(same ? 1.0f : 0.0f);
 }

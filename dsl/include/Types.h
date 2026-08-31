@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <unordered_map>
 
 // 32-bin normalized hue histogram (each bin 0..1, sum == 1).  Shared by
 // object attributes and whole-image attributes, and exposed to the DSL via the
@@ -61,6 +62,11 @@ struct ImageAttrs {
     // ---- user tags (key-value annotations, edited via the GUI) ----
     std::map<std::string, std::string> user_tags;
 
+    // ---- clustering (extension packs with capabilities.can_cluster) ----
+    // cluster_groups[cluster_name] = distinct cluster ids found in this image
+    // for that clustering pack (e.g. "face_cluster" -> ["face_cluster_person_001"]).
+    std::unordered_map<std::string, std::vector<std::string>> cluster_groups;
+
     // ---- Places365 scene recognition (computed during cache preprocessing) ----
     // scene_vector: softmax probabilities over the 365 Places365 scene classes
     // (index i -> categories_places365.txt line i).  All zeros when the scene
@@ -95,6 +101,14 @@ struct DetectedObject {
     int parent_id = -1;  // id of the parent object (set for objects produced by `>>`)
     int obj_id = -1;     // globally unique object id
     int img_id = -1;     // image id (index in the photo cache)
+
+    // ---- embeddings / clustering (extension packs with can_cluster) ----
+    // embeddings[embedding_name] = feature vector extracted by the pack's
+    // embedding model (e.g. "face" -> 512-dim L2-normalized vector).
+    std::unordered_map<std::string, std::vector<float>> embeddings;
+    // cluster_ids[cluster_name] = cluster id assigned to this object by the
+    // clustering pass (e.g. "face_cluster" -> "face_cluster_person_001").
+    std::unordered_map<std::string, std::string> cluster_ids;
 };
 
 // Monotonic global object-id generator.  Shared by the cache builder and the

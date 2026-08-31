@@ -1,0 +1,23 @@
+{
+  "name": "face_recognition_v1",
+  "parent_class": "person",
+  "children": ["face"],
+  "model_path": "model.onnx",
+  "input_size": 112,
+  "conf_threshold": 0.0,
+  "crop_padding": 0.1,
+  "is_classifier": false,
+  "input_normalize": "imagenet",
+  "capabilities": {
+    "can_extract_embedding": true,
+    "embedding_name": "face",
+    "can_cluster": true,
+    "cluster_name": "face_cluster",
+    "cluster_threshold": 0.55
+  },
+  "gui": {
+    "group_label": "人物",
+    "show_in_sidebar": true,
+    "icon": "👤"
+  }
+}

@@ -1,5 +1,7 @@
 #include "CacheManager.h"
 #include "../utils/filesystem_utils.h"
+#include "../cluster/Clustering.h"
+#include "ExtensionManager.h"
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
@@ -176,12 +178,92 @@ bool CacheManager::applyIncrementalUpdate() {
             }
             index_.entries[e.path] = std::move(e);
         }
+        // New / changed objects may shift global cluster assignments.
+        runClustering();
     }
 
     saveIndex();
     rebuildPhotoCache();
     cache_valid_ = true;
     return true;
+}
+
+// Re-run the clustering pass for every active clustering pack.  Cluster ids are
+// deterministic: the candidate objects are visited in (path, obj_id) order, so
+// the same gallery always yields the same ids (and GUI renames stay valid as
+// long as the cache is not rebuilt).
+void CacheManager::runClustering() {
+    if (!ext_mgr_) return;
+    auto packs = ext_mgr_->clusterPacks();
+    if (packs.empty()) return;
+
+    bool changed = false;
+    for (const auto* pack : packs) {
+        struct Item {
+            std::string rel;
+            DetectedObject* obj;
+            const std::vector<float>* emb;
+        };
+        std::vector<Item> items;
+        for (auto& [rel, ce] : index_.entries) {
+            for (auto& o : ce.objects) {
+                auto it = o.embeddings.find(pack->embedding_name);
+                if (it != o.embeddings.end()) items.push_back({rel, &o, &it->second});
+            }
+        }
+        if (items.empty()) continue;
+
+        // Deterministic visit order -> stable cluster ids across runs.
+        std::sort(items.begin(), items.end(), [](const Item& a, const Item& b) {
+            if (a.rel != b.rel) return a.rel < b.rel;
+            return a.obj->obj_id < b.obj->obj_id;
+        });
+
+        std::vector<std::vector<float>> embs;
+        embs.reserve(items.size());
+        for (const auto& it : items) embs.push_back(*it.emb);
+
+        auto labels = clusterDbscan(embs, pack->cluster_threshold, 1);
+        if (labels.size() != items.size()) continue;
+
+        std::string parent = pack->parent_class.empty() ? "item" : pack->parent_class;
+        std::unordered_map<int, std::string> id_by_label;
+        int counter = 0;
+        for (size_t i = 0; i < items.size(); ++i) {
+            int lab = labels[i];
+            if (lab < 0) continue;
+            if (!id_by_label.count(lab)) {
+                ++counter;
+                id_by_label[lab] = pack->cluster_name + "_" + parent + "_" + zeroPad(counter, 3);
+            }
+            items[i].obj->cluster_ids[pack->cluster_name] = id_by_label[lab];
+        }
+
+        // Rebuild per-image cluster_groups for this cluster name.
+        for (auto& [rel, ce] : index_.entries) {
+            ce.img_attrs.cluster_groups[pack->cluster_name].clear();
+        }
+        for (const auto& it : items) {
+            auto cid = it.obj->cluster_ids.find(pack->cluster_name);
+            if (cid == it.obj->cluster_ids.end()) continue;
+            auto& groups = index_.entries[it.rel].img_attrs.cluster_groups[pack->cluster_name];
+            if (std::find(groups.begin(), groups.end(), cid->second) == groups.end()) {
+                groups.push_back(cid->second);
+            }
+        }
+        for (auto& [rel, ce] : index_.entries) {
+            std::sort(ce.img_attrs.cluster_groups[pack->cluster_name].begin(),
+                      ce.img_attrs.cluster_groups[pack->cluster_name].end());
+        }
+        std::cout << "[Cache] Clustering '" << pack->cluster_name << "': "
+                  << items.size() << " objects, " << counter << " clusters." << std::endl;
+        changed = true;
+    }
+
+    if (changed) {
+        saveIndex();
+        rebuildPhotoCache();
+    }
 }
 
 bool CacheManager::buildIndexFromScratch() {
@@ -221,6 +303,8 @@ bool CacheManager::buildIndexFromScratch() {
         std::cerr << "[Cache] No images found in any photo directory." << std::endl;
         return false;
     }
+
+    runClustering();   // assign cluster ids over the freshly built gallery
 
     saveIndex();
     rebuildPhotoCache();
@@ -287,12 +371,33 @@ bool CacheManager::inferEntry(const std::string& full_path, CacheEntry& e) {
         d.obj_id = id_gen_.next();
         e.objects.push_back(d);
     }
+
+    // ---- clustering packs: extract embeddings for matching objects ----
+    // Each active clustering pack may attach an embedding to the objects of its
+    // parent class.  Persisted with the object so the global clustering pass
+    // (runClustering) can re-run over old + new embeddings without re-inference.
+    if (ext_mgr_) {
+        auto packs = ext_mgr_->clusterPacks();
+        if (!packs.empty()) {
+            for (auto& obj : e.objects) {
+                for (const auto* pack : packs) {
+                    if (obj.class_name != pack->parent_class && obj.super_class != pack->parent_class) {
+                        continue;
+                    }
+                    if (obj.embeddings.count(pack->embedding_name)) continue;
+                    auto emb = ext_mgr_->extractEmbedding(full_path, obj, pack->name);
+                    if (emb.size() >= 8) obj.embeddings[pack->embedding_name] = std::move(emb);
+                }
+            }
+        }
+    }
     return true;
 }
 
 void CacheManager::rebuildPhotoCache() {
     cache_data_.images.clear();
     cache_data_.photo_dir = photo_dirs_.empty() ? "" : photo_dirs_[0];
+    cache_data_.collections = index_.collections;
     image_index_.clear();
 
     std::vector<std::pair<std::string, const CacheEntry*>> sorted;
@@ -389,4 +494,53 @@ std::unordered_set<std::string> CacheManager::applyTagFilters(const std::vector<
         if (match) result.insert(rel);
     }
     return result;
+}
+
+// ---- virtual album (collection) management ----
+
+void CacheManager::addToCollection(const std::string& name, const std::string& rel_path) {
+    if (name.empty() || rel_path.empty()) return;
+    auto& paths = index_.collections[name];
+    if (std::find(paths.begin(), paths.end(), rel_path) == paths.end()) {
+        paths.push_back(rel_path);
+        saveIndex();
+        rebuildPhotoCache();
+    }
+}
+
+void CacheManager::removeFromCollection(const std::string& name, const std::string& rel_path) {
+    auto it = index_.collections.find(name);
+    if (it == index_.collections.end()) return;
+    auto& paths = it->second;
+    paths.erase(std::remove(paths.begin(), paths.end(), rel_path), paths.end());
+    saveIndex();
+    rebuildPhotoCache();
+}
+
+void CacheManager::deleteCollection(const std::string& name) {
+    if (index_.collections.erase(name) > 0) {
+        saveIndex();
+        rebuildPhotoCache();
+    }
+}
+
+bool CacheManager::renameImage(const std::string& old_rel, const std::string& new_rel) {
+    auto it = index_.entries.find(old_rel);
+    if (it == index_.entries.end()) return false;
+    if (old_rel == new_rel || new_rel.empty()) return true;
+
+    CacheEntry e = std::move(it->second);
+    e.path = new_rel;
+    index_.entries.erase(it);
+    index_.entries[new_rel] = std::move(e);
+
+    // Keep the relative path references in every collection in sync.
+    for (auto& [name, paths] : index_.collections) {
+        for (auto& p : paths) {
+            if (p == old_rel) p = new_rel;
+        }
+    }
+    saveIndex();
+    rebuildPhotoCache();
+    return true;
 }
