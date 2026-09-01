@@ -24,31 +24,31 @@
 
 ### 主窗口
 
-![主窗口](docs/images/main_window.png)
+![主窗口](docs/images/main_window.PNG)
 
 ### 自然语言搜索
 
-![自然语言搜索](docs/images/nl_search.png)
+![自然语言搜索](docs/images/nl_search.PNG)
 
 ### 排序结果网格
 
-![排序结果](docs/images/results_grid.png)
+![排序结果](docs/images/results_grid.PNG)
 
 ### 图片详情对话框
 
-![图片详情对话框](docs/images/detail_dialog.png)
+![图片详情对话框](docs/images/detail_dialog.PNG)
 
 ### 标签预筛选对话框
 
-![标签预筛选对话框](docs/images/tag_filter.png)
+![标签预筛选对话框](docs/images/tag_filter.PNG)
 
 ### 设置页
 
-![设置页](docs/images/settings.png)
+![设置页](docs/images/settings.PNG)
 
 ### REPL / 命令行
 
-![REPL / CLI](docs/images/repl.png)
+![REPL / CLI](docs/images/repl.PNG)
 
 ---
 

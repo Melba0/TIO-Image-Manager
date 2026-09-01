@@ -24,31 +24,31 @@ A desktop image-retrieval tool made of two parts:
 
 ### Main window
 
-![Main window](docs/images/main_window.png)
+![Main window](docs/images/main_window.PNG)
 
 ### Natural-language search
 
-![Natural-language search](docs/images/nl_search.png)
+![Natural-language search](docs/images/nl_search.PNG)
 
 ### Ranked result grid
 
-![Ranked results](docs/images/results_grid.png)
+![Ranked results](docs/images/results_grid.PNG)
 
 ### Image detail dialog
 
-![Image detail dialog](docs/images/detail_dialog.png)
+![Image detail dialog](docs/images/detail_dialog.PNG)
 
 ### Tag pre-filter dialog
 
-![Tag pre-filter dialog](docs/images/tag_filter.png)
+![Tag pre-filter dialog](docs/images/tag_filter.PNG)
 
 ### Settings page
 
-![Settings page](docs/images/settings.png)
+![Settings page](docs/images/settings.PNG)
 
 ### REPL / CLI
 
-![CLI / REPL](docs/images/repl.png)
+![CLI / REPL](docs/images/repl.PNG)
 
 ---
 
