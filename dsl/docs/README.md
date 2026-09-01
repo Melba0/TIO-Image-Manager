@@ -1,147 +1,164 @@
-# 图像检索 DSL 解释器（Image Retrieval DSL Interpreter）
+# Image Retrieval DSL Interpreter
 
-基于 C++17 的图片检索 DSL 解释器，内置 YOLOv8m（Open Images V7，601 类）目标检测
-（ONNX Runtime / CPU）与智能增量缓存。
-用户通过类自然语言的查询语句（例如 `$ : (any(class == "cat"))`）从图库中检索图片、提取对象、
-执行继承查询与扩展包细化。
+[**English**](README.md) ・ [**中文**](README_zh.md)
 
-## 功能特性
+A C++17 image-retrieval DSL interpreter with built-in YOLOv8m (Open Images V7, 601 classes)
+object detection (ONNX Runtime / CPU) and a smart incremental cache. Users retrieve images from
+the library, extract objects, run inheritance-aware counts and extension-pack refinement through
+natural-language-like queries such as `$ : (any(class == "cat"))`.
 
-- **DSL 查询语言**：筛选 `$ : (条件)`、对象级条件 `any()` / `all()`、对象提取 `%`、图片上溯 `^`、
-  集合运算 `| & -`、算术/比较/逻辑运算、`cnt()` 继承计数、`>>` 扩展包细化、`del` 删除语句。
-- **统一宏系统**：内置宏（数学 `max/min/abs/sqrt/pow/log/exp`、颜色 `color/cct/warmth/...`、
-  几何 `big/left/square`、关系 `inside/left_of`、氛围 `warm/bright/smooth/rough`）与用户宏
-  （`macro 名(参数)=表达式`）共用同一张宏表。
-- **图像属性**：每张图在缓存预处理阶段计算 32 维色调直方图（`obj_hist`/`img_hist`/`hist_sim`）、
-  曝光评分（`img_over`/`img_under`/`img_exp_good`）、清晰度（`img_blur`/`obj_blur`）、
-  内置轻量 EXIF 解析（相机/ISO/快门/光圈/焦距/日期）与可编辑的用户标记 `user_tags`。
-- **场景识别（Places365）**：预处理阶段用 Places365 模型（ONNX Runtime / CPU，纯 C++）
-  计算 365 维场景概率向量，DSL 宏 `img_scene("beach")` / `img_scene_top()` /
-  `img_is_indoor()` 按场景检索（模型缺失时优雅降级）。
-- **标签预筛选**：`--tag-filter key=v1|v2` 在求值前把 `$` 限制到标签匹配的图片（多条件 AND、
-  值 OR）；匹配 0 张时返回空结果而非回退全库。GUI 通过「🏷️ 标签筛选」对话框配置并持久化。
-- **资产管理**：`del <路径|表达式|变量>` 删除图片文件并同步更新缓存索引；GUI 支持多选删除。
-- **智能缓存（增量更新）**：检测结果序列化为 `cache/<model>/cache_index.json`（版本 1.1）。
-  每次启动按文件修改时间/大小对比图库，**只对新增/修改的图片重新推理**，删除的图片自动剔除；
-  无变化时直接加载索引（秒级启动）。旧版 `metadata.json` 自动迁移。
-- **模型注册表（Model Registry）**：通过 `models/registry.json` 动态切换基座 YOLO 模型，无需重新编译。
-- **继承查询（is-a）**：`classes.json` 定义完整继承链，`cnt(fruit)` 同时统计 `fruit` 及其子类
-  （`apple`/`banana`…）；OIV7 模型的父类（`fruit`/`food`/`animal`/`vehicle`…）本身就是输出类别。
-- **推理阈值可调**：`base_conf_threshold` / `iou_threshold` / `fallback_threshold` 存于
-  `config/settings.ini` 的 `[inference]` 段，GUI 设置页「推理阈值」面板可调，引擎启动时读取。
-- **扩展包（Extension Pack）**：对检测到的对象进行区域裁剪并运行专用 ONNX 模型（检测器/分类器），
-  实现"细粒度"二次分析（如 `person` → 身体部位）。
-- **ONNX Runtime 推理后端**：基座模型与扩展模型统一由 `InferenceBackend` 抽象接口驱动（当前实现
-  `OnnxInference`），CPU 推理，无 LibTorch/GPU 依赖。
-- **多语言类别名**：类别名支持 UTF-8（含中文），例如 `cnt(fruit)`、`any flower`。
+## Features
 
-## 目录结构
+- **DSL query language**: filter `$ : (condition)`, object-level conditions `any()` / `all()`,
+  object extraction `%`, image lift `^`, set operations `| & -`, arithmetic/comparison/logic,
+  inheritance-aware count `cnt()`, extension-pack refinement `>>`, `del` delete statements.
+- **Unified macro system**: built-in macros (math `max/min/abs/sqrt/pow/log/exp`, color
+  `color/cct/warmth/...`, geometry `big/left/square`, relationships `inside/left_of`, atmosphere
+  `warm/bright/smooth/rough`) and user macros (`macro name(args) = expr`) share one macro table.
+- **Image attributes**: every image gets a 32-bin hue histogram (`obj_hist`/`img_hist`/
+  `hist_sim`), exposure scores (`img_over`/`img_under`/`img_exp_good`), sharpness
+  (`img_blur`/`obj_blur`), a lightweight built-in EXIF reader (camera/ISO/shutter/aperture/
+  focal length/date) and editable user tags `user_tags` during the cache pre-processing phase.
+- **Scene recognition (Places365)**: a 365-dim scene probability vector is computed per image
+  during pre-processing with Places365 (ONNX Runtime / CPU, pure C++); DSL macros
+  `img_scene("beach")` / `img_scene_top()` / `img_is_indoor()` search by scene (graceful
+  degradation when the model is missing).
+- **Clustering (V2)**: embedding extension packs (e.g. face recognition) automatically extract
+  an embedding per matching object and run DBSCAN clustering during cache build; results
+  (`cluster_ids` + per-image `cluster_groups`) persist into `cache_index.json` and drive the
+  GUI's grouped sidebar view (`cluster_id()` / `cluster_sim()` DSL macros).
+- **Tag pre-filter**: `--tag-filter key=v1|v2` restricts `$` to matching images before
+  evaluation (AND across conditions, OR across values); matching 0 images yields an empty result
+  instead of silently falling back to the whole library. The GUI configures it via the
+  🏷️ Tag Filter dialog and persists it.
+- **Asset management**: `del <path|expression|variable>` deletes image files and updates the
+  cache index; the GUI supports multi-select deletion.
+- **Smart cache (incremental update)**: detection results are serialized to
+  `cache/<model>/cache_index.json` (version 1.2). On startup the library is compared by file
+  mtime/size and **only added/modified images are re-inferred**; deleted images are pruned; if
+  nothing changed the index is loaded directly (second-level startup). Legacy `metadata.json`
+  is auto-migrated.
+- **Model Registry**: switch base YOLO models dynamically via `models/registry.json` without
+  recompiling.
+- **Inheritance queries (is-a)**: `classes.json` defines the full inheritance chain;
+  `cnt(fruit)` counts `fruit` and its subclasses (`apple`/`banana`…). The OIV7 parent classes
+  (`fruit`/`food`/`animal`/`vehicle`…) are themselves output classes.
+- **Configurable inference thresholds**: `base_conf_threshold` / `iou_threshold` /
+  `fallback_threshold` live in the `[inference]` section of `config/settings.ini` and can be
+  adjusted in the GUI settings page.
+- **Extension packs**: crop detected object regions and run a dedicated ONNX model
+  (detector/classifier/embedding) for fine-grained secondary analysis (e.g.
+  `person` → body parts).
+- **ONNX Runtime inference backend**: base and extension models are driven by the
+  `InferenceBackend` abstraction (current implementation `OnnxInference`), CPU inference, no
+  LibTorch/GPU dependency.
+- **Multilingual class names**: class names support UTF-8 (including Chinese), e.g.
+  `cnt(fruit)`, `any flower`.
+
+## Directory Layout
 
 ```
 tio/
-├── photo/                        # 待检索图片（.jpg / .png）
-└── dsl/                          # 项目根目录
-    ├── CMakeLists.txt            # 构建脚本（MSVC + Ninja + ONNX Runtime）
-    ├── cmake/                    # Findonnxruntime.cmake 等 CMake 模块
-    ├── include/                  # 公共头文件（Types / InferenceBackend / ModelRegistry）
+├── photo/                        # images to search (.jpg / .png)
+└── dsl/                          # project root
+    ├── CMakeLists.txt            # build script (MSVC + Ninja + ONNX Runtime)
+    ├── cmake/                    # Findonnxruntime.cmake and other CMake modules
+    ├── include/                  # public headers (Types / InferenceBackend / ModelRegistry)
     ├── src/
-    │   ├── main.cpp              # 入口：CLI 解析、--json 模式、REPL、/reload
-    │   ├── parser/               # Lexer / Parser / AST（手写递归下降）
+    │   ├── main.cpp              # entry: CLI parsing, --json mode, REPL, /reload
+    │   ├── parser/               # Lexer / Parser / AST (hand-written recursive descent)
     │   ├── executor/             # Evaluator / Context / BuiltinMacros
-    │   ├── cache/                # CacheManager(增量) + CacheIndex + YoloInference(ONNX)
-    │   ├── scene/                # SceneInference（Places365，ONNX）
-    │   ├── engine/               # OnnxInference（ONNX Runtime 后端）
+    │   ├── cache/                # CacheManager (incremental) + CacheIndex + YoloInference (ONNX)
+    │   ├── scene/                # SceneInference (Places365, ONNX)
+    │   ├── cluster/              # Clustering (DBSCAN over embeddings)
+    │   ├── engine/               # OnnxInference (ONNX Runtime backend)
     │   └── utils/                # filesystem_utils / exif_reader
     ├── models/
-    │   ├── registry.json         # 切换开关（active_base / active_extensions）
+    │   ├── registry.json         # switches (active_base / active_extensions)
     │   ├── base/yolov8m-oiv7/    # {model.onnx, meta.json, classes.json}
-    │   ├── scene/                # Places365 场景识别（.onnx + categories + meta.json）
-    │   └── extensions/           # 扩展包（可选，见 extension_pack_format.md）
+    │   ├── extensions/           # extension packs (see extension_pack_format.md)
+    │   └── scene/                # Places365 (.onnx + categories + meta.json)
     ├── config/
-    │   └── settings.ini           # GUI 设置 + [inference] 推理阈值
-    ├── cache/                    # 运行时自动生成（按模型分子目录）
-    ├── docs/                     # 本文档
-    └── *.py                      # export_yolov8 / export_places365 / caffe_places365_to_onnx
+    │   └── settings.ini          # GUI settings + [inference] thresholds
+    ├── cache/                    # generated at runtime (subdir per model)
+    └── docs/                     # this documentation
 ```
 
-## 环境依赖
+## Requirements
 
-| 依赖 | 说明 |
-|------|------|
-| C++ 编译器 | MSVC 19.5x+（Visual Studio 2022 工具链） |
-| CMake ≥ 3.18 | 配合 Ninja 或 Visual Studio 生成器 |
-| ONNX Runtime | 从 [onnxruntime releases](https://github.com/microsoft/onnxruntime/releases) 下载 `onnxruntime-win-x64-<ver>.zip`（CPU 版），解压后设置 `-DONNXRUNTIME_ROOT=<解压目录>` 或 `CMAKE_PREFIX_PATH` |
-| nlohmann/json | 头文件库（`include/` 下需能找到 `nlohmann/json.hpp`，可用 `-DNLOHMANN_INCLUDE_DIR` 指定） |
-| GDI+ / Windowscodecs | Windows 系统库，用于图片解码 |
+| Dependency | Notes |
+|------------|-------|
+| C++ compiler | MSVC 19.5x+ (Visual Studio 2022 toolchain) |
+| CMake ≥ 3.18 | with Ninja or the Visual Studio generator |
+| ONNX Runtime | download `onnxruntime-win-x64-<ver>.zip` (CPU) from [onnxruntime releases](https://github.com/microsoft/onnxruntime/releases), extract, then pass `-DONNXRUNTIME_ROOT=<extracted>` or `CMAKE_PREFIX_PATH` |
+| nlohmann/json | header-only (must find `nlohmann/json.hpp` under `include/`; use `-DNLOHMANN_INCLUDE_DIR`) |
+| GDI+ / Windowscodecs | Windows system libraries, used for image decoding |
 
-## 构建
+## Build
 
 ```powershell
-# 进入项目目录
+# from a Visual Studio developer prompt (vcvars64):
 cd dsl
 
-# 使用 Visual Studio 开发者命令行（含 vcvars64）后执行：
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release `
       -DONNXRUNTIME_ROOT="D:/path/to/onnxruntime-win-x64-1.29.0" `
       -DNLOHMANN_INCLUDE_DIR="D:/path/to/your-nlohmann-json-include"
 cmake --build build
 
-# onnxruntime.dll 由 POST_BUILD 自动复制到 build/ 下
+# onnxruntime.dll is copied next to the exe by POST_BUILD
 ```
 
-## 模型导出（`.pt` → `.onnx`）
+## Model Export (`.pt` → `.onnx`)
 
-推理后端只加载 `.onnx` 模型。基座模型与扩展模型分别用以下命令导出：
+The inference backend only loads `.onnx` models:
 
 ```powershell
-# 基座 YOLO（输出 (1, 4+nc, N)，框为 letterbox 后输入像素坐标）
-python export_yolov8.py yolov8m-oiv7.pt models/base/yolov8m-oiv7/model.onnx
-# 或官方 CLI：yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
+# base YOLO (output (1, 4+nc, N), boxes in letterboxed input-pixel coordinates)
+yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
 ```
 
-导出后把 ONNX 文件放到对应 `model.onnx`，并维护好 `meta.json` 与 `classes.json`。
-详见 [python_tools.md](python_tools.md)。
+After export, place the ONNX file as `model.onnx` and maintain `meta.json` and `classes.json`
+(see [base_model_pack_format.md](base_model_pack_format.md)).
 
-## 快速开始
+## Quick Start
 
 ```powershell
-# 交互式 REPL（默认加载 models/registry.json 指定的基座模型）
+# interactive REPL (loads the base model from models/registry.json by default)
 build\dsl.exe
 
-# 执行 DSL 脚本
+# run a DSL script
 build\dsl.exe query.dsl
 
-# 查看注册的模型
+# list registered models
 build\dsl.exe --list-models
 
-# 临时切换基座模型（优先于配置文件）
+# temporarily override the base model (takes precedence over the config file)
 build\dsl.exe --base yolov8m-oiv7
 
-# --json 模式（GUI 使用）：DSL 从 stdin 读入，结果以 JSON 输出
+# --json mode (used by the GUI): DSL is read from stdin, results printed as JSON
 build\dsl.exe --json --photo .\photo < query.dsl
 ```
 
-REPL 示例（新语法：`$ : (条件)` 筛选，`any()`/`all()` 为对象级条件函数）：
+REPL examples (modern syntax: `$ : (condition)` filter, `any()`/`all()` object-level conditions):
 
 ```dsl
-dsl> $ : (any(class == "person"))                       # 所有含人的图片
-dsl> % $ : (any(class == "person"))                     # 所有 person 对象
-dsl> $ : (cnt(fruit) > 2)                               # 水果（含 apple/banana 子类）超过 2 的图片
-dsl> $ : (img_warmth() > 0.7 && any(class == "cat"))    # 暖色且含猫
-dsl> $ : (any(hist_value(obj, 0) + hist_value(obj, 31) > 0.3))  # 红色占比高的图片
+dsl> $ : (any(class == "person"))                       # all images with a person
+dsl> % $ : (any(class == "person"))                     # all person objects
+dsl> $ : (cnt(fruit) > 2)                               # images with >2 fruit (incl. apple/banana subclasses)
+dsl> $ : (img_warmth() > 0.7 && any(class == "cat"))    # warm and has a cat
+dsl> $ : (any(hist_value(obj, 0) + hist_value(obj, 31) > 0.3))  # images with a large red share
 dsl> people = % $ : (any(class == "person"))
-dsl> parts = people >> person_parts_v1                  # 对 person 做身体部位细化（需扩展包）
-dsl> ^ parts                                            # 上溯回这些部位所在的图片
-dsl> del people                                         # 删除 people 对应图片（文件 + 缓存）
-dsl> /reload                                            # 热重载 models/registry.json（可切换模型）
+dsl> parts = people >> person_parts_v1                  # body-part refinement (needs the pack)
+dsl> ^ parts                                            # lift back to the containing images
+dsl> del people                                         # delete the images of people (file + cache)
+dsl> /reload                                            # hot-reload models/registry.json
 ```
 
-详细内容请参阅：
+See also:
 
-- [DSL 语言参考](dsl_reference.md)
-- [使用教程](usage_tutorial.md)
-- [架构说明](architecture.md)
-- [主模型包内部 JSON 格式](base_model_pack_format.md)
-- [扩展包内部 JSON 格式](extension_pack_format.md)
-- [Python 工具脚本说明](python_tools.md)
-- [项目交接文档（团队接手指南）](handover.md)
+- [DSL language reference](dsl_reference.md)
+- [Usage tutorial](usage_tutorial.md)
+- [Architecture](architecture.md)
+- [Base model pack JSON format](base_model_pack_format.md)
+- [Extension pack JSON format](extension_pack_format.md)
+- [Project handover (team guide)](handover.md)

@@ -1,18 +1,22 @@
-# 使用教程
+# Usage Tutorial
 
-本教程介绍解释器各功能模块的实际用法：首次运行、增量缓存、模型注册表、继承查询、
-标签预筛选、资产管理，以及桌面 GUI 的配合使用。
+[**English**](usage_tutorial.md) ・ [**中文**](usage_tutorial_zh.md)
 
-## 1. 首次运行与增量缓存
+This tutorial walks through the practical use of each interpreter feature: first run,
+incremental cache, model registry, inheritance queries, tag pre-filtering, asset management,
+albums, clustering, and working with the desktop GUI.
 
-程序启动时会扫描 `tio/photo/` 下的图片，并依据当前激活的基座模型运行 YOLO 推理。
+## 1. First Run & Incremental Cache
+
+On startup the program scans the images under `tio/photo/` and runs YOLO inference with the
+currently active base model.
 
 ```powershell
 cd dsl
 build\dsl.exe
 ```
 
-启动日志示例：
+Example startup log:
 
 ```
 [Main] active base model: yolov8m-oiv7 (C:\...\dsl\models\base\yolov8m-oiv7\model.onnx)
@@ -22,20 +26,21 @@ build\dsl.exe
 [Cache] Cache is up to date (128 images).
 ```
 
-- **首次运行**（无缓存索引）：对每张图执行 YOLO 推理（CPU 下约数分钟），
-  结果写入 `cache/yolov8m-oiv7/cache_index.json`。
-- **再次运行**：扫描图库并对比 `mtime`/`size`，**只对新增/修改的图片重新推理**，
-  删除的图片自动剔除；无变化时直接加载索引（秒级，不加载模型）。
-- **缓存失效**：以下情况会触发重建：
-  - 图片文件新增 / 删除 / 修改；
-  - 缓存格式版本变化；
-  - **切换了基座模型**（缓存按模型分子目录）。
+- **First run** (no cache index): YOLO inference on every image (a few minutes on CPU), results
+  written to `cache/yolov8m-oiv7/cache_index.json`.
+- **Subsequent runs**: scan the gallery, compare `mtime`/`size`, **only re-infer added/modified
+  images**, prune deleted ones; if nothing changed, load the index directly (sub-second, no model
+  load).
+- **Cache invalidation**: rebuild is triggered when:
+  - image files are added / deleted / modified;
+  - the cache format version changes;
+  - **the base model changes** (caches are per-model subdirectories).
 
-### 缓存内容（cache_index.json，版本 1.1）
+### Cache contents (cache_index.json, version 1.2)
 
 ```json
 {
-  "version": "1.1",
+  "version": "1.2",
   "model_name": "yolov8m-oiv7",
   "next_obj_id": 225,
   "next_img_id": 128,
@@ -62,189 +67,228 @@ build\dsl.exe
 }
 ```
 
-> 用户标记 `user_tags` 由 GUI 详情面板编辑并写回该文件；标签预筛选正是基于它工作的。
+> The `user_tags` are edited in the GUI detail panel and written back to this file; the tag
+> pre-filter works on top of them.
 
-## 2. 模型注册表（Model Registry）
+## 2. Model Registry
 
-### 目录约定
+### Directory conventions
 
 ```
 models/
-├── registry.json          # 切换开关
+├── registry.json          # switches
 └── base/
-    ├── yolov8m-oiv7/      # 一个模型一个子目录
-    │   ├── model.onnx     # ONNX 模型（引擎只加载 .onnx）
+    ├── yolov8m-oiv7/      # one directory per model
+    │   ├── model.onnx     # ONNX model (the engine only loads .onnx)
     │   ├── meta.json      # { "name", "type", "input_size", "classes" }
-    │   └── classes.json   # 输出类别 + 父类继承链
+    │   └── classes.json   # output classes + parent inheritance chain
 ```
 
-`meta.json` 示例：
+`meta.json` example:
 
 ```json
 { "name": "yolov8m-oiv7", "type": "detector", "input_size": 640, "classes": 601 }
 ```
 
-`registry.json` 示例：
+`registry.json` example:
 
 ```json
 { "active_base": "yolov8m-oiv7", "active_extensions": [] }
 ```
 
-### 切换模型（改配置后重启）
+### Switching models (edit config, then restart)
 
-编辑 `models/registry.json`，把 `active_base` 改为其它模型名，重启程序（或 REPL 中 `/reload`）。
-程序检测到 `cache/<新模型>/` 不存在（或旧缓存属于其它模型），自动用新模型重建缓存。
+Edit `models/registry.json`, change `active_base` to another model name, restart (or `/reload`
+in the REPL). When the program detects that `cache/<new-model>/` does not exist (or the old cache
+belongs to another model), it automatically rebuilds the cache with the new model.
 
-### 命令行临时切换
+### Temporary switch on the command line
 
 ```powershell
-build\dsl.exe --base yolov8m-oiv7   # 本次运行使用 yolov8m-oiv7
-build\dsl.exe --list-models         # 列出所有注册的基座模型
+build\dsl.exe --base yolov8m-oiv7   # use yolov8m-oiv7 for this run
+build\dsl.exe --list-models         # list all registered base models
 ```
 
-`--base` 优先级高于 `registry.json`；指定不存在的模型会报错并列出可用项。
+`--base` takes precedence over `registry.json`; an unknown name prints an error and lists the
+available ones.
 
-### 添加新基座模型
+### Adding a new base model
 
-1. 用 `export_yolov8.py`（或官方 `yolo export`）把 `.pt` 转成 `.onnx`，放入 `models/base/<名字>/model.onnx`。
-2. 同目录创建 `meta.json`（`name` 与目录名一致）与 `classes.json`（见
-   [base_model_pack_format.md](base_model_pack_format.md) 的字段规则）。
-3. 编辑 `models/registry.json` 的 `active_base`，或启动时用 `--base <名字>`。
+1. Convert the `.pt` to `.onnx` (see [base_model_pack_format.md](base_model_pack_format.md)),
+   place it at `models/base/<name>/model.onnx`.
+2. In the same directory create `meta.json` (`name` must match the directory) and `classes.json`
+   (see the field rules in [base_model_pack_format.md](base_model_pack_format.md)).
+3. Set `active_base` in `models/registry.json`, or pass `--base <name>` at startup.
 
-## 3. 继承映射与置信度降级
+## 3. Inheritance Mapping & Confidence Fallback
 
-`classes.json` 定义"子类 → 父类"（is-a）继承链。推理阈值统一放在
-`config/settings.ini` 的 `[inference]` 段（GUI 设置页「推理阈值」面板可调），
-其中 `fallback_threshold`（默认 0）控制置信度降级：
+`classes.json` defines the "child → parent" (is-a) inheritance chains. Inference thresholds live
+in the `[inference]` section of `config/settings.ini` (adjustable in the GUI settings page),
+where `fallback_threshold` (default 0) controls confidence fallback:
 
-- 检测置信度 **≥ base_conf_threshold**（默认 0.25）才会被记录；
-- **fallback_threshold = 0**：禁用降级。OIV7 模型本身就能直接输出 `fruit`、`food`、
-  `animal`、`vehicle` 等父类别，无需再按置信度把子类改写为父类；
-  若手动调高，则置信度低于该值的检测会降级为父类名（`original_class` 保留原类别）。
+- a detection with confidence **≥ base_conf_threshold** (default 0.25) is recorded;
+- **fallback_threshold = 0**: fallback disabled. The OIV7 model already outputs parent classes
+  (`fruit`, `food`, `animal`, `vehicle`, …) directly, so there is no need to rewrite subclasses
+  into parents by confidence; if you raise it manually, detections below that confidence are
+  rewritten to the parent class name (`original_class` keeps the original).
 
-`cnt(fruit)` 既统计类别名为 `fruit` 的对象，也统计 `apple`/`banana` 等子类：
+`cnt(fruit)` counts objects whose class is `fruit` as well as subclasses like `apple`/`banana`:
 
 ```dsl
-cnt(fruit)                          # 全库水果总数
-$ : (cnt(person) > 2)               # person 超过 2 个的图片
-$ : (cnt(animal) > 0)               # animal 及其全部子类（cat/dog/…）
+cnt(fruit)                          # total fruit in the library
+$ : (cnt(person) > 2)               # images with more than 2 people
+$ : (cnt(animal) > 0)               # animal and all its subclasses (cat/dog/…)
 ```
 
-> 类别名与 `classes.json` 完全一致：小写，多词类别用下划线（如 `traffic_light`、
-> `stop_sign`、`mobile_phone`）。父类别（`fruit`/`food`/`animal`/`vehicle`…）就是
-> 模型的直接输出类别。
+> Class names must exactly match `classes.json`: lowercase, multi-word classes use underscores
+> (e.g. `traffic_light`, `stop_sign`, `mobile_phone`). Parent classes
+> (`fruit`/`food`/`animal`/`vehicle`…) are direct model output classes.
 
-## 3.5 场景识别（Places365）
+## 3.5 Scene Recognition (Places365)
 
-在缓存预处理阶段，每张图片还会通过 **Places365** 场景模型（ONNX Runtime / CPU，纯 C++）
-计算一个 365 维场景概率向量，与物体检测并行、互不干扰。结果写入
-`cache_index.json` 的 `img_attrs`：
+During the cache pre-processing phase, every image is also run through the **Places365** scene
+model (ONNX Runtime / CPU, pure C++) to compute a 365-dim scene probability vector, in parallel
+with and independent from object detection. The result is written into `img_attrs` of
+`cache_index.json`:
 
 ```json
 "img_attrs": {
   "...": "...",
-  "scene_vector": [0.01, 0.02, 0.85, ...],   // 365 个场景的概率
+  "scene_vector": [0.01, 0.02, 0.85, ...],   // probabilities of the 365 scenes
   "dominant_scene": "beach",
-  "indoor_score": 0.12                        // P(室内) = 前 205 类概率之和
+  "indoor_score": 0.12                        // P(indoor) = sum of the first 205 classes
 }
 ```
 
-DSL 场景宏（模型缺失时返回 0.0 / 空字符串，不报错）：
+DSL scene macros (return 0.0 / empty string when the model is missing, no error):
 
-| 宏 | 说明 | 示例 |
-|----|------|------|
-| `img_scene("name")` | 场景概率（0~1） | `$ : (img_scene("beach") > 0.7)` |
-| `img_scene_top()` | 概率最高的场景名 | `$ : (img_scene_top() == "forest")` |
-| `img_is_indoor()` | 室内概率（0~1） | `$ : (img_is_indoor() > 0.6 && any(class == "person"))` |
-| `img_scene_vec()` | 内部宏（返回最高概率） | — |
+| Macro | Description | Example |
+|-------|-------------|---------|
+| `img_scene("name")` | scene probability (0–1) | `$ : (img_scene("beach") > 0.7)` |
+| `img_scene_top()` | name of the highest-probability scene | `$ : (img_scene_top() == "forest")` |
+| `img_is_indoor()` | indoor probability (0–1) | `$ : (img_is_indoor() > 0.6 && any(class == "person"))` |
+| `img_scene_vec()` | internal macro (returns the top probability) | — |
 
-场景名取自 `models/scene/categories_places365.txt`（365 行）；名称大小写、
-`-`/`_`/空格 均视为等价（`dining_room` == `dining room`）。
+Scene names come from `models/scene/categories_places365.txt` (365 lines); name case and
+`-`/`_`/space are treated as equivalent (`dining_room` == `dining room`).
 
-**模型准备**（用户操作，一次性）：
+**Model preparation** (one-time): the model files are already provided in `models/scene/`
+(`places365_googlenet.onnx` + `categories_places365.txt`). To regenerate the ONNX from the
+official Caffe weights or a PyTorch checkpoint, export with `torch.onnx` following the
+conventions in `models/scene/README.md`.
 
-```powershell
-cd dsl
-# GoogLeNet（Caffe 官方权重，推荐）：
-python caffe_places365_to_onnx.py ../googlenet_places365.caffemodel \
-       models/scene/deploy_googlenet_places365.prototxt \
-       models/scene/places365_googlenet.onnx
-# 或 ResNet18（PyTorch 检查点）：
-python export_places365.py resnet18_places365.pth.tar models/scene/places365_googlenet.onnx
-# 并把 categories_places365.txt 放到 models/scene/（详见 models/scene/README.md）
-```
+> Scene recognition is on par with YOLO object detection, color histograms, exposure/sharpness,
+> EXIF and user tags and can be used simultaneously; inference happens during the cache build,
+> queries only read the cache, and per-image scene inference is < 50 ms (CPU).
 
-> 场景识别与 YOLO 物体检测、颜色直方图、曝光/清晰度、EXIF、用户标记等特性平级，
-> 可同时使用；推理在缓存构建阶段完成，查询阶段只读缓存，单张图片场景推理 < 50ms（CPU）。
+## 4. Tag Pre-Filter
 
-## 4. 标签预筛选（Tag Pre-Filter）
-
-在求值**之前**把 `$` 限制到 `user_tags` 匹配的图片，适合"先缩小范围再精确查询"。
+Restricts `$` to images whose `user_tags` match, **before** evaluation — good for
+"narrow down first, then query precisely".
 
 ```powershell
-# 命令行：多条件 AND，同一 key 的多个值 OR
+# CLI: AND across conditions, OR across values of the same key
 build\dsl.exe --json --photo .\photo --tag-filter "city=sh|bj" --tag-filter "level=3"
-build\dsl.exe --json --photo .\photo --tag-filter "location="   # 该 key 任意值
+build\dsl.exe --json --photo .\photo --tag-filter "location="   # any value for this key
 ```
 
-- 每个 `--tag-filter key=v1|v2` 是一个条件；多个条件之间是 **AND**；同一 key 的多个值是 **OR**。
-- `key=`（空值列表）表示"存在该 key 即可，值不限"。
-- 匹配 0 张时返回**空结果**（不会悄悄回退到全库）。
+- Each `--tag-filter key=v1|v2` is one condition; multiple conditions are **AND**; multiple values
+  of the same key are **OR**.
+- `key=` (empty value list) means "the key exists, any value".
+- Matching 0 images returns an **empty result** (never silently falls back to the whole library).
 
-GUI 用法：点击搜索栏的 **🏷️ 标签筛选**，在对话框里添加 `key + 值` 条件（支持多行、删除、
-清空）。点击「应用筛选」后生效，条件会**持久化**（重启后仍在）；对话框再次打开时自动回填上次条件。
+GUI usage: click **🏷️ Tag Filter** in the search bar, add `key + value` conditions in the dialog
+(multi-line, delete, clear supported). Click **Apply Filter** to activate; conditions **persist**
+(survive restart) and the dialog pre-fills the last conditions when reopened.
 
-## 5. 资产管理（删除图片）
+## 5. Asset Management (deleting images)
 
-- **DSL 语句**：`del <目标>`，目标可以是字符串路径、图片集合表达式或变量。
-  引擎会删除对应磁盘文件并同步更新缓存索引。
+- **DSL statement**: `del <target>`, where the target is a string path, an image-set expression
+  or a variable. The engine deletes the files on disk and synchronously updates the cache index.
 
 ```dsl
-del "000000000049.jpg"                    # 删除单张图片
-del $ : (any(class == "cat"))             # 删除所有含猫的图片
+del "000000000049.jpg"                    # delete a single image
+del $ : (any(class == "cat"))             # delete all images with a cat
 people = % $ : (any(class == "person"))
-del people                                # 删除变量指向的图片
+del people                                # delete the images pointed to by a variable
 ```
 
-- **GUI**：在结果网格中按住 Ctrl/Shift 多选缩略图，点 **🗑 删除选中**（带确认）。
+- **GUI**: Ctrl/Shift multi-select thumbnails in the result grid, then **🗑 Delete Selected**
+  (with confirmation).
 
-> 删除为不可逆操作。GUI 检测到 DSL 含 `del` 时会弹出确认框。
+> Deletion is irreversible. The GUI shows a confirmation dialog when it detects `del` in the DSL.
 
-## 6. 扩展包（Extension Pack）
+## 5.5 Albums (virtual collections)
 
-扩展包对基座模型检测到的对象做"二次精细化分析"：把某个父类对象区域裁剪出来，
-喂给专用的小模型（分类器或检测器），产出子类对象（如 `person` → `head/torso/arm/leg`）。
+Albums are logical groups managed by the GUI and stored in the `collections` field of
+`cache_index.json` — they never move files on disk.
+
+- **Create / manage**: in the GUI left sidebar, right-click the 📁 Albums branch → New Album, then
+  drag thumbnails into it (or right-click a thumbnail → Add to Album).
+- **Query from DSL**: `collection("name")` returns the album's image set and combines with filters
+  and set operations (see the DSL reference):
+
+```dsl
+collection("My Trip")                              # all images in the album
+collection("My Trip") : (any(class == "cat"))      # cats inside the album
+collection("Cat Picks") | collection("Dog Picks")  # union of two albums
+```
+
+## 5.6 Clustering / People Groups (V2)
+
+With a clustering extension pack active (e.g. `face_recognition_v1`), the cache build extracts an
+embedding per matching object and DBSCAN-clusters the whole library. The GUI shows a group branch
+(e.g. 👤 People) in the left sidebar:
+
+- each cluster is a clickable item (mapped name or raw id + photo count); clicking shows that
+  group's photos in the grid;
+- double-click / right-click → Rename to give the cluster a human-friendly name (persisted in
+  `config/cluster_name_mappings.json`);
+- query clusters from DSL with the clustering macros:
+
+```dsl
+# images whose object belongs to cluster person_001
+$ : (any(cluster_id(obj, "face_cluster") == "face_cluster_person_001"))
+```
+
+## 6. Extension Packs
+
+Extension packs perform "secondary fine-grained analysis" on objects detected by the base model:
+the region of a parent-class object is cropped and fed to a dedicated small model (classifier or
+detector) to produce child objects (e.g. `person` → `head/torso/arm/leg`).
 
 ```
 models/extensions/<name>/
 ├── config.json   # { name, parent_class, children, model_path, input_size, conf_threshold, crop_padding, is_classifier }
-└── model.onnx    # 分类器 [1,nc] 或检测器 [1,4+nc,anchors]
+└── model.onnx    # classifier [1,nc] or detector [1,4+nc,anchors] or embedding [1,D]
 ```
 
-`models/registry.json` 的 `active_extensions` 决定哪些包可被 `>>` 使用（未注册的包报错）：
+`active_extensions` in `models/registry.json` decides which packs are usable with `>>`
+(unregistered packs error):
 
 ```powershell
-# 手写 models/extensions/<name>/config.json，并把 "<name>" 加入 registry.json 的 active_extensions
+# hand-write models/extensions/<name>/config.json and add "<name>" to registry.json active_extensions
 ```
 
 ```dsl
 people = % $ : (any(class == "person"))
-parts = people >> demo_v1    # 对每个人物裁剪区域并运行扩展模型
-^ parts                      # 上溯回这些部位所在的图片
+parts = people >> demo_v1    # crop each person and run the extension model
+^ parts                      # lift back to the containing images
 ```
 
-`parts` 中的每个对象带 `parent_id`（关联父对象 id）、`super_class`（父类名）、
-新的全局 `obj_id`，并映射回原图坐标。扩展包格式详见 [extension_pack_format.md](extension_pack_format.md)。
+Every object in `parts` carries `parent_id` (linking to the parent), `super_class` (the parent
+class) and a new global `obj_id`, mapped back to original-image coordinates. See
+[extension_pack_format.md](extension_pack_format.md) for the pack format.
 
-## 7. REPL 交互
+## 7. REPL Interaction
 
-| 指令 | 作用 |
-|------|------|
-| `exit` / `quit` | 退出 |
-| `/reload` | 重读 `models/registry.json`（可切换基座模型与扩展包） |
-| 其它输入 | 当作 DSL 表达式/赋值/`del` 执行 |
+| Command | Effect |
+|---------|--------|
+| `exit` / `quit` | quit |
+| `/reload` | re-read `models/registry.json` (switches base model and extension packs) |
+| anything else | executed as a DSL expression / assignment / `del` |
 
-示例会话：
+Example session:
 
 ```dsl
 dsl> $ : (any(class == "person"))
@@ -257,34 +301,40 @@ ObjectSet (50 objects):
   ...
 ```
 
-> 在 Windows 上，若 REPL 中直接输入中文无法匹配，请确保控制台为 UTF-8 编码
-> （程序启动时会自动设置，或在终端执行 `chcp 65001`）。
+> On Windows, if typing Chinese directly in the REPL fails to match, make sure the console is
+> UTF-8 (the program sets it at startup, or run `chcp 65001` in the terminal).
 
-## 8. 桌面 GUI（tio.exe）
+## 8. Desktop GUI (tio.exe)
 
-GUI 位于 `tio/gui`（Qt 6）。构建后在 `gui/build/tio.exe` 双击运行：
+The GUI lives in `tio/gui` (Qt 6). After building, double-click `gui/build/tio.exe`:
 
-1. 在搜索框输入自然语言（如"一只猫在狗左边"），点「翻译为 DSL」调用 LLM 生成 DSL；
-   也可直接在 DSL 编辑区手写后点「执行检索」。
-2. 结果以缩略图网格展示（按模糊分数降序，低分自动过滤）。
-3. 双击结果打开**图片详情**对话框：查看元数据（曝光/清晰度/EXIF），编辑用户标记。
-4. 搜索栏 **🏷️ 标签筛选**：配置标签预筛选（见第 4 节）。
-5. 搜索栏 **🗑 删除选中**：多选删除图片（见第 5 节）。
-6. 右上角语言切换（EN/中文）、设置页（API/图库/模型/推理阈值/扩展/日志）、深浅主题切换。
+1. Type a natural-language sentence in the search box (e.g. *"a cat to the left of a dog"*), click
+   **Translate to DSL** to have the LLM generate DSL; or type DSL directly in the editor and click
+   **Search**.
+2. Results are shown as a thumbnail grid (sorted by fuzzy score descending; low scores filtered).
+3. Double-click a result to open the **image-detail dialog**: view metadata (exposure /
+   sharpness / EXIF / scene), edit user tags.
+4. **🏷️ Tag Filter** in the search bar: configure tag pre-filtering (see §4).
+5. **🗑 Delete Selected** in the search bar: multi-select delete (see §5).
+6. Top-right: language switch (EN/中文), settings page (API / gallery / models / inference
+   thresholds / extensions / logs), dark & light theme toggle.
+7. Left sidebar: 📁 Albums, 🔍 Smart Albums and 👤 People branches — albums, smart albums
+   (auto-grouped by tag/attr rules) and cluster groups.
 
-## 9. 常见问题
+## 9. FAQ
 
-**Q：切换模型后查询结果没变？**
-A：请确认 `models/registry.json` 的 `active_base` 已修改且重启（或 REPL 中执行 `/reload`）；
-缓存按模型名隔离，切换后会在下一次查询时重建。
+**Q: Results don't change after switching models?**
+A: Confirm `active_base` in `models/registry.json` was changed and you restarted (or ran `/reload`
+in the REPL); caches are isolated per model name and are rebuilt on the next query after a switch.
 
-**Q：`>> xxx` 报错 "not active in registry"？**
-A：该扩展包未出现在 `registry.json` 的 `active_extensions`，请检查拼写或启用它。
+**Q: `>> xxx` errors "not active in registry"?**
+A: That pack is not in `active_extensions` of `registry.json`; check the spelling or enable it.
 
-**Q：标签筛选似乎没生效？**
-A：确认图片存在对应的 `user_tags`（在详情面板编辑并已写回 `cache_index.json`）；
-`--tag-filter "key="`（无值）表示"key 任意值"，`key=val` 为精确匹配。
-匹配 0 张会得到空结果，而非全库。
+**Q: The tag filter seems to have no effect?**
+A: Make sure the images have the corresponding `user_tags` (edited in the detail panel and written
+back to `cache_index.json`); `--tag-filter "key="` (no value) means "any value for key",
+`key=val` is exact matching. Matching 0 images gives an empty result, not the whole library.
 
-**Q：首次构建很慢？**
-A：CPU 推理正常现象。缓存生成后再次运行极快；减少 `photo/` 图片数可缩短首建时间。
+**Q: The first build is very slow?**
+A: That's normal for CPU inference. Subsequent runs are extremely fast once the cache exists;
+reducing the number of images in `photo/` shortens the first build.

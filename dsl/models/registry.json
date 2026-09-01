@@ -1,6 +1,6 @@
 {
-  "active_base": "yolov8m-oiv7",
-  "active_extensions": [
-    "face_recognition_v1"
-  ]
+    "active_base": "yolov8m-oiv7",
+    "active_extensions": [
+        "face_recognition_v1"
+    ]
 }

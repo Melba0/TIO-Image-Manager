@@ -1,7 +1,8 @@
-# tio — Image Retrieval DSL Tool / 图像检索 DSL 工具
+# tio — Image Retrieval DSL Tool
+
+[**English**](README.md) ・ [**中文**](README_zh.md)
 
 > Natural-language image retrieval: **describe → DSL → ranked results**.
-> 自然语言图片检索：**输入一句话 → 翻译成 DSL → 引擎模糊检索并排序返回**。
 
 [![Language: C++17](https://img.shields.io/badge/language-C%2B%2B17-blue.svg)](https://isocpp.org/)
 [![GUI: Qt 6](https://img.shields.io/badge/GUI-Qt%206-green.svg)](https://www.qt.io/)
@@ -19,232 +20,280 @@ A desktop image-retrieval tool made of two parts:
 
 ---
 
-## 功能特性 / Features
+## Screenshots
 
-| 特性 | Feature |
-|------|---------|
-| 自然语言检索（GUI + LLM 翻译） | Natural-language search: describe an image and the GUI translates it to DSL via an LLM |
-| 手写递归下降 DSL 解析器 | Hand-written recursive-descent parser (no generator), UTF-8 identifiers support 中文类名 |
-| YOLOv8m（Open Images V7，601 类）检测（ONNX Runtime, CPU） | YOLOv8m-OIV7 object detection (601 classes, incl. `fruit`/`food`/`animal` parents) through ONNX Runtime (CPU-only) |
-| 新式筛选语法 `$ : (条件)` | Modern filter syntax `$ : (condition)` plus `any(...)` / `all(...)` object-level conditions |
-| 集合与上溯：`%` / `^` / `\| & -` | Object extraction `%`, image lift `^`, set union/intersection/difference |
-| 继承计数 `cnt(fruit)` | Inheritance-aware counting: `cnt(fruit)` also counts `apple`/`banana` subclasses |
-| 可调推理阈值 | Configurable inference thresholds (base-conf / IoU / fallback) in the GUI settings page |
-| 增量缓存 | Incremental cache (`cache/<model>/cache_index.json`): only re-infers added/modified files |
-| 图像属性：曝光 / 清晰度 / EXIF / 用户标记 | Image attrs: exposure, blur, lightweight built-in EXIF reader, editable user tags |
-| Places365 场景识别（纯 C++/ONNX, CPU） | Scene recognition: 365-class Places365 vector cached per image, queried via `img_scene("beach")` / `img_scene_top()` / `img_is_indoor()` |
-| 直方图宏 | 32-bin hue histograms: `obj_hist` / `img_hist` / `hist_sim` / `hist_value` |
-| 标签预筛选（GUI 对话框 + `--tag-filter`） | Tag pre-filter pipeline: restrict `$` to images matching key-value tags (persisted) |
-| 资产管理（多选删除 / DSL `del`） | Asset management: multi-select delete in the grid, `del` statement in DSL |
-| 扩展包 `>>` | Extension packs: crop detected objects and run a fine-grained ONNX model |
-| 统一宏系统 | Unified macro table: math/geometry/relationship/atmosphere macros + user macros |
-| 中英文 GUI + 深浅主题 | Bilingual GUI (中文/EN) with dark & light themes |
+### Main window
+
+![Main window](docs/images/main_window.png)
+
+### Natural-language search
+
+![Natural-language search](docs/images/nl_search.png)
+
+### Ranked result grid
+
+![Ranked results](docs/images/results_grid.png)
+
+### Image detail dialog
+
+![Image detail dialog](docs/images/detail_dialog.png)
+
+### Tag pre-filter dialog
+
+![Tag pre-filter dialog](docs/images/tag_filter.png)
+
+### Settings page
+
+![Settings page](docs/images/settings.png)
+
+### REPL / CLI
+
+![CLI / REPL](docs/images/repl.png)
 
 ---
 
-## 项目简介 / Overview
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| Natural-language search | Describe an image and the GUI translates it to DSL via an LLM |
+| Hand-written recursive-descent parser | No generator; UTF-8 identifiers support Chinese class names |
+| YOLOv8m (Open Images V7, 601 classes) detection | ONNX Runtime (CPU-only), incl. `fruit`/`food`/`animal` parent classes |
+| Modern filter syntax `$ : (condition)` | Plus `any(...)` / `all(...)` object-level conditions |
+| Sets & lift: `%` / `^` / `\| & -` | Object extraction, image lift, union / intersection / difference |
+| Inheritance-aware counting `cnt(fruit)` | Also counts `apple`/`banana` subclasses |
+| Configurable inference thresholds | base-conf / IoU / fallback, adjustable in the GUI settings page |
+| Incremental cache | `cache/<model>/cache_index.json`: only re-infers added/modified files |
+| Image attributes | exposure, sharpness, lightweight built-in EXIF reader, editable user tags |
+| Places365 scene recognition | Pure C++/ONNX, CPU; queried via `img_scene("beach")` / `img_scene_top()` / `img_is_indoor()` |
+| Histogram macros | 32-bin hue histograms: `obj_hist` / `img_hist` / `hist_sim` / `hist_value` |
+| Tag pre-filter (GUI dialog + `--tag-filter`) | Restricts `$` to images matching key→value tags (persisted) |
+| Asset management | Multi-select delete in the grid, `del` statement in DSL |
+| Extension packs `>>` | Crop detected objects and run a fine-grained ONNX model |
+| Clustering extension packs (V2) | Embedding models auto-cluster objects (DBSCAN); sidebar people view + rename |
+| Unified macro system | math / geometry / relationship / atmosphere macros + user macros |
+| Bilingual GUI + dark & light themes | 中文/EN with dark & light themes |
+
+---
+
+## Overview
 
 **tio** is a semantic image-retrieval tool. Instead of keyword matching, you describe what you
-want — *“a cat to the left of a dog”* — and the engine ranks images by a fuzzy DSL evaluation.
-
-**tio** 是一款语义图片检索工具。你不需要输入关键词，而是用一句话描述想要的画面
-（例如"一只猫在狗左边"），引擎会基于 DSL 模糊求值对图库图片进行排序。
+want — *"a cat to the left of a dog"* — and the engine ranks images by a fuzzy DSL evaluation.
 
 ```
-一句话描述 ──► tio.exe (Qt GUI) ──LLM──► DSL 代码 ──QProcess──► dsl.exe (C++ 引擎)
+sentence ──► tio.exe (Qt GUI) ──LLM──► DSL code ──QProcess──► dsl.exe (C++ engine)
                                                                     │
                                     ┌───────────────────────────────┤
                                     ▼                               ▼
                     cache/<model>/cache_index.json     models/base/yolov8m-oiv7/model.onnx
-                    (增量缓存 / incremental cache)      + models/registry.json
+                    (incremental cache)                + models/registry.json
 ```
 
 - The GUI talks to the engine through `QProcess` in `--json` mode: DSL goes in on **stdin**,
   results come back as **JSON on stdout**.
 - The engine loads/incrementally updates its cache on startup, then evaluates the DSL.
 
+![Architecture](docs/images/architecture.png)
+
+> **What to capture:** a diagram of the data flow above: user → GUI → LLM → DSL → engine →
+> cache (`cache_index.json`) and models (ONNX + registry).
+
 ---
 
-## 目录结构 / Repository Layout
+## Repository Layout
 
 ```
 tio/
-├── photo/                  # 图库图片 .jpg/.png（示例 COCO 图片）
-│                           # sample gallery (add your own images)
-├── dsl/                    # 引擎 / the C++ engine
+├── photo/                  # sample gallery (add your own images)
+├── dsl/                    # the C++ engine
 │   ├── CMakeLists.txt      # MSVC + Ninja + ONNX Runtime
 │   ├── cmake/              # Findonnxruntime.cmake
 │   ├── include/            # Types / InferenceBackend / ModelRegistry ...
 │   ├── src/
-│   │   ├── main.cpp        # 入口 + CLI + --json 模式 + REPL
-│   │   ├── parser/         # Lexer / Parser / AST（手写递归下降）
+│   │   ├── main.cpp        # entry + CLI + --json mode + REPL
+│   │   ├── parser/         # Lexer / Parser / AST (hand-written recursive descent)
 │   │   ├── executor/       # Evaluator / Context / BuiltinMacros
-│   │   ├── cache/          # CacheManager（增量）+ CacheIndex + YoloInference(ONNX)
-│   │   ├── scene/          # SceneInference（Places365 场景识别，ONNX）
-│   │   ├── engine/         # OnnxInference（ONNX Runtime 后端）
+│   │   ├── cache/          # CacheManager (incremental) + CacheIndex + YoloInference (ONNX)
+│   │   ├── scene/          # SceneInference (Places365, ONNX)
+│   │   ├── cluster/        # Clustering (DBSCAN over embeddings)
+│   │   ├── engine/         # OnnxInference (ONNX Runtime backend)
 │   │   └── utils/          # filesystem_utils / exif_reader
 │   ├── models/
 │   │   ├── registry.json   # active_base / active_extensions
 │   │   ├── base/yolov8m-oiv7/   # {model.onnx, meta.json, classes.json}
-│   │   └── scene/          # Places365（.onnx + categories + meta.json，见其 README）
-│   ├── cache/              # 运行时生成 / generated at runtime
-│   ├── config/             # settings.ini（GUI 设置 + 推理阈值）
-│   ├── docs/               # 中文文档 / Chinese docs
-│   └── gui/                # Qt 6 桌面端 / the Qt GUI
-    └── build/              # 产物 tio.exe + 伴生 dsl.exe（POST_BUILD 自动部署）
+│   │   ├── extensions/          # extension packs (see extension_pack_format)
+│   │   └── scene/          # Places365 (.onnx + categories + meta.json)
+│   ├── cache/              # generated at runtime
+│   ├── config/             # settings.ini (GUI settings + inference thresholds)
+│   ├── docs/               # documentation (EN / 中文)
+│   └── gui/                # the Qt GUI
+        └── build/          # tio.exe + bundled dsl.exe (auto-deployed by POST_BUILD)
 ```
 
 ---
 
-## 环境依赖 / Requirements
+## Requirements
 
-| 依赖 | 说明 | Requirement |
-|------|------|-------------|
-| C++17 编译器 | MSVC 19.5x+（Visual Studio 2022） | Windows toolchain |
-| CMake ≥ 3.18 | 配合 Ninja | with Ninja or VS generator |
-| ONNX Runtime | CPU 版 `onnxruntime-win-x64-<ver>.zip` | [onnxruntime releases](https://github.com/microsoft/onnxruntime/releases) |
-| nlohmann/json | 头文件库 | header-only; set `-DNLOHMANN_INCLUDE_DIR` |
-| GDI+ / Windowscodecs | Windows 系统库，图片解码 | system libs (image decoding) |
-| Qt 6（GUI） | 6.10.x MinGW，`windeployqt` 部署 | [Qt](https://www.qt.io/download-open-source) |
-| Python 3.10+（可选） | 仅用于模型导出 `.pt → .onnx` | only for model export |
+| Dependency | Requirement |
+|------------|-------------|
+| C++17 compiler | MSVC 19.5x+ (Visual Studio 2022) |
+| CMake ≥ 3.18 | with Ninja or VS generator |
+| ONNX Runtime | CPU build `onnxruntime-win-x64-<ver>.zip` from [onnxruntime releases](https://github.com/microsoft/onnxruntime/releases) |
+| nlohmann/json | header-only; set `-DNLOHMANN_INCLUDE_DIR` |
+| GDI+ / Windowscodecs | Windows system libs (image decoding) |
+| Qt 6 (GUI) | 6.10.x MinGW, deploy with `windeployqt` |
+| Python 3.10+ (optional) | only for model export `.pt → .onnx` |
 
 ---
 
-## 构建 / Build
+## Build
 
-### 引擎 / Engine
+### Engine
 
 ```powershell
-# 在 vcvars64 开发者环境中执行 / from a vcvars64 developer prompt:
+# from a vcvars64 developer prompt:
 cd dsl
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release `
       -DONNXRUNTIME_ROOT="D:/path/to/onnxruntime-win-x64-1.29.0" `
       -DNLOHMANN_INCLUDE_DIR="D:/path/to/your-nlohmann-json-include"
 cmake --build build
-# onnxruntime.dll 由 POST_BUILD 自动复制到 build/ 下
-# (onnxruntime.dll is copied next to the exe by POST_BUILD)
+# onnxruntime.dll is copied next to the exe by POST_BUILD
 ```
 
-### GUI（Qt 桌面端 / Desktop client）
+### GUI (desktop client)
 
 ```powershell
 cmake -S gui -B gui/build -G Ninja -DCMAKE_PREFIX_PATH=D:/Qt/6.10.1/mingw_64
 cmake --build gui/build
-# POST_BUILD 自动完成：复制引擎 dsl.exe + onnxruntime.dll、windeployqt 部署 Qt 运行时
-# (POST_BUILD copies dsl.exe + onnxruntime.dll and runs windeployqt)
+# POST_BUILD copies dsl.exe + onnxruntime.dll and runs windeployqt
 ```
 
-运行 / run: double-click `gui/build/tio.exe`.
+Run: double-click `gui/build/tio.exe`.
+
+![Main window](docs/images/main_window.png)
+
+> **What to capture:** the app as launched from `gui/build/tio.exe`.
 
 ---
 
-## 模型导出（.pt → .onnx）/ Model Export
+## Model Export (.pt → .onnx)
 
-The engine only loads `.onnx` models. Export a YOLOv8 checkpoint with the bundled tool
-(or the official `yolo export` CLI):
+The engine only loads `.onnx` models. Export a YOLOv8 checkpoint with the official `yolo export`
+CLI:
 
 ```powershell
-python export_yolov8.py yolov8m-oiv7.pt models/base/yolov8m-oiv7/model.onnx
-# 等价 / equivalent:  yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
+yolo export model=yolov8m-oiv7.pt format=onnx opset=12 imgsz=640
 ```
 
 A registered base model needs `model.onnx` + `meta.json` + `classes.json` under
-`models/base/<name>/` (see [python_tools.md](dsl/docs/python_tools.md) and
-[base_model_pack_format.md](dsl/docs/base_model_pack_format.md)).
+`models/base/<name>/` (see [base_model_pack_format.md](dsl/docs/base_model_pack_format.md)).
 
 ---
 
-## 快速开始 / Quick Start
+## Quick Start
 
-### 命令行 / CLI
+### CLI
 
 ```powershell
-build\dsl.exe                      # 交互式 REPL / interactive REPL
-build\dsl.exe --list-models        # 查看注册的模型 / list registered models
-build\dsl.exe --base yolov8m-oiv7  # 临时切换基座模型 / override the active base
+build\dsl.exe                      # interactive REPL
+build\dsl.exe --list-models        # list registered models
+build\dsl.exe --base yolov8m-oiv7  # override the active base model
 build\dsl.exe --json --photo .\photo --tag-filter "city=sh" < query.dsl
 ```
 
-### REPL 示例（新语法）/ REPL examples (modern syntax)
+### REPL examples (modern syntax)
 
 ```dsl
-dsl> $ : (any(class == "person"))              # 所有含人的图片 / images with a person
-dsl> % $ : (any(class == "person"))            # 提取所有 person 对象 / extract person objects
-dsl> $ : (cnt(fruit) > 2)                      # 水果（含子类）> 2 的图片 / >2 fruit (incl. subclasses)
-dsl> $ : (img_warmth() > 0.7 && any(class == "cat"))   # 暖色且含猫 / warm and has a cat
+dsl> $ : (any(class == "person"))              # images with a person
+dsl> % $ : (any(class == "person"))            # extract person objects
+dsl> $ : (cnt(fruit) > 2)                      # >2 fruit (incl. subclasses)
+dsl> $ : (img_warmth() > 0.7 && any(class == "cat"))   # warm and has a cat
 dsl> people = % $ : (any(class == "person"))
-dsl> parts = people >> person_parts_v1         # 扩展细化 / fine-grained refinement
-dsl> ^ parts                                   # 上溯到图片 / lift back to images
-dsl> /reload                                   # 热重载 registry.json / hot-reload config
+dsl> parts = people >> person_parts_v1         # fine-grained refinement
+dsl> ^ parts                                   # lift back to images
+dsl> /reload                                   # hot-reload registry.json
 ```
 
-> 旧量词语法 `$ any (cond)` 仍向后兼容；新代码一律推荐 `$ : (cond)` + `any()`/`all()`。
+> The legacy quantifier syntax `$ any (cond)` remains backward-compatible; new code should use
+> `$ : (cond)` + `any()`/`all()`.
+
+![REPL / CLI](docs/images/repl.png)
+
+> **What to capture:** a REPL session running the example queries above.
 
 ---
 
-## 标签预筛选与资产管理 / Tag Pre-Filter & Asset Management
+## Tag Pre-Filter & Asset Management
 
 **Tag pre-filter** restricts the whole query to images whose `user_tags` match all given
-key→value conditions (values are OR-ed). In the GUI, press **🏷️ 标签筛选** to build the
+key→value conditions (values are OR-ed). In the GUI, press **🏷️ Tag Filter** to build the
 conditions in a dialog; the filter is persisted across restarts.
 
 ```powershell
-# 命令行等价 / CLI equivalent:
+# CLI equivalent:
 dsl.exe --json --photo .\photo --tag-filter "city=sh|bj" --tag-filter "level=3"
-dsl.exe --json --photo .\photo --tag-filter "location="    # 任意值的 location / any value
+dsl.exe --json --photo .\photo --tag-filter "location="    # any value for location
 ```
 
-An active filter matching nothing yields **zero** results (it never silently falls back to
-the whole library).
+An active filter matching nothing yields **zero** results (it never silently falls back to the
+whole library).
 
 **Asset management**:
-- In the grid, multi-select thumbnails (Ctrl/Shift) and press **🗑 删除选中** to delete files
-  + remove their cache entries.
+- In the grid, multi-select thumbnails (Ctrl/Shift) and press **🗑 Delete Selected** to delete
+  files + remove their cache entries.
 - In DSL, `del <path>` / `del <image-set expression>` / `del <variable>` deletes images.
 
+![Tag pre-filter dialog](docs/images/tag_filter.png)
+
+> **What to capture:** the tag filter dialog with conditions like `city=sh` and `level=3`.
+
 ---
 
-## DSL 速查 / DSL Cheat Sheet
+## DSL Cheat Sheet
 
-| 语法 | 含义 | Meaning |
-|------|------|---------|
-| `$` | 全量图库 / the whole library | all images (or current image inside a quantifier) |
-| `$ : (cond)` | 筛选满足条件的图片 | filter images where `cond` holds |
-| `any(cond)` / `all(cond)` | 存在 / 全部满足 | existential / universal object condition |
-| `%` | 提取对象 | ImageSet → ObjectSet |
-| `^` | 上溯图片 | ObjectSet → ImageSet (dedup) |
-| `\| & -` | 并 / 交 / 差集 | union / intersection / difference |
-| `>> pack` | 扩展细化 | run an extension model on matching objects |
-| `cnt(cls)` | 继承计数 | count objects of `cls` incl. subclasses |
-| `macro f(x)=expr` | 定义宏 | define a user macro |
+| Syntax | Meaning |
+|--------|---------|
+| `$` | the whole library (or the current image inside a quantifier) |
+| `$ : (cond)` | filter images where `cond` holds |
+| `any(cond)` / `all(cond)` | existential / universal object condition |
+| `%` | extract objects: ImageSet → ObjectSet |
+| `^` | lift images: ObjectSet → ImageSet (dedup) |
+| `\| & -` | union / intersection / difference |
+| `>> pack` | run an extension model on matching objects |
+| `cnt(cls)` | count objects of `cls` incl. subclasses |
+| `macro f(x)=expr` | define a user macro |
+| `collection("name")` | virtual album (managed by the GUI) as an ImageSet |
+| `cluster_id(obj, "c")` / `cluster_sim(a, b, "c")` | clustering macros (V2) |
 
 Object properties: `class` `x` `y` `w` `h` `area` `confidence` `super_class` `original_class`.
-Attribute macros: `big` `small` `left` `right` `top` `bottom` `square`, `left_of` `above` `inside`,
-`warm` `cool` `bright` `dark` `smooth` `rough`; math `max/min/abs/sqrt/pow/log/exp`.
+Attribute macros: `big` `small` `left` `right` `top` `bottom` `square`, `left_of` `above`
+`inside`, `warm` `cool` `bright` `dark` `smooth` `rough`; math `max/min/abs/sqrt/pow/log/exp`.
 
 Image macros: `img_warmth()` `img_bright()` `img_color()` `img_blur()` `img_over()` `img_under()`
-`img_exp_good()` `img_camera()` `img_iso()` `img_shutter()` `img_aperture()` `img_fl()` `img_date()`
-`img_tag(k)` `img_has_tag(k)` `img_tag_equals(k,v)` `obj_hist(o)` `img_hist()` `hist_sim(A,B)`
-`hist_value(o,i)` `img_hist_value(i)` `img_hist_val(i)` `stof(s)` `str_contains(s,sub)`.
+`img_exp_good()` `img_camera()` `img_iso()` `img_shutter()` `img_aperture()` `img_fl()`
+`img_date()` `img_tag(k)` `img_has_tag(k)` `img_tag_equals(k,v)` `img_scene(name)`
+`img_scene_top()` `img_is_indoor()` `obj_hist(o)` `img_hist()` `hist_sim(A,B)` `hist_value(o,i)`
+`img_hist_value(i)` `stof(s)` `str_contains(s,sub)`.
 
 ---
 
-## 文档 / Documentation
+## Documentation
 
-Primary documentation is in Chinese under [`dsl/docs/`](dsl/docs/):
+Documentation is bilingual (English / 中文). Each page has a language switch at the top.
 
-| 文档 | 说明 |
-|------|------|
-| [dsl_reference.md](dsl/docs/dsl_reference.md) | DSL 语言完整参考 / full language reference |
-| [usage_tutorial.md](dsl/docs/usage_tutorial.md) | 使用教程 / usage tutorial |
-| [architecture.md](dsl/docs/architecture.md) | 架构说明 / architecture |
-| [base_model_pack_format.md](dsl/docs/base_model_pack_format.md) | 基座模型包格式 / base model pack format |
-| [extension_pack_format.md](dsl/docs/extension_pack_format.md) | 扩展包格式 / extension pack format |
-| [python_tools.md](dsl/docs/python_tools.md) | Python 模型导出工具 / model-export tools |
+| Document | Description |
+|----------|-------------|
+| [dsl_reference.md](dsl/docs/dsl_reference.md) | full DSL language reference |
+| [usage_tutorial.md](dsl/docs/usage_tutorial.md) | usage tutorial |
+| [architecture.md](dsl/docs/architecture.md) | architecture overview |
+| [base_model_pack_format.md](dsl/docs/base_model_pack_format.md) | base model pack format |
+| [extension_pack_format.md](dsl/docs/extension_pack_format.md) | extension pack format (incl. clustering V2) |
+| [handover.md](dsl/docs/handover.md) | team handover / known issues |
 
 ---
 
-## 路线图 / Roadmap
+## Roadmap
 
 - [ ] Extension-pack demos + docs for `>>` refinement
 - [ ] Linux / macOS engine builds (ONNX Runtime is cross-platform)
@@ -253,7 +302,6 @@ Primary documentation is in Chinese under [`dsl/docs/`](dsl/docs/):
 
 ---
 
-## 许可证 / License
+## License
 
 This project is licensed under the **GNU General Public License v3.0** — see [LICENSE](LICENSE).
-本项目采用 **GPL-3.0** 协议发布，详见 [LICENSE](LICENSE)。
